@@ -1,0 +1,3 @@
+[submodule "Assets/Project/Code/Libraries/MapGenerationLibrary"]
+	path = Assets/Project/Code/Libraries/MapGenerationLibrary
+	url = https://github.com/DemiEljer/MapGenearionLibrary.git
