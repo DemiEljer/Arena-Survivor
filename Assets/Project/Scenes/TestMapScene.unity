@@ -673,6 +673,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MapObjectFabricScript
   WallsPrefabs:
   - {fileID: 4031939471867580332, guid: d117b7d9bbe07764d82bf6d82034bdc3, type: 3}
+  PillarsPrefabs:
+  - {fileID: 8323861031108241930, guid: 4f92dd97b9103844aac4e3bb74646cc0, type: 3}
   FloorPrefabs:
   - {fileID: 8323861031108241930, guid: 4f92dd97b9103844aac4e3bb74646cc0, type: 3}
   RoofPrefabs:
@@ -689,8 +691,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd9e3502bc4651c40a054f390bd82956, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapGenerationScript
-  Width: 15
-  Height: 15
+  GenerationSeed: 2
+  Width: 20
+  Height: 20
   MaxLayerCount: 7
   MinRoomWidth: -1
   MinRoomHeight: -1
@@ -698,12 +701,12 @@ MonoBehaviour:
   IsRandomDoorsCount: 1
   CellSize: 1
   WallWidth: 0.1
-  WallHeight: 1
+  WallHeight: 1.2
   FloorHeight: 0.1
   RoofHeight: 0.1
   DoesGenerateWalls: 1
   DoesGenerateFloor: 1
-  DoesGenerateRoof: 1
+  DoesGenerateRoof: 0
 --- !u!1 &2100184265
 GameObject:
   m_ObjectHideFlags: 0

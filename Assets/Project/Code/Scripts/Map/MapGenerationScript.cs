@@ -5,7 +5,9 @@ using Unity.VisualScripting;
 
 public class MapGenerationScript : MonoBehaviour
 {
-    private static MapFabric _MapFabric { get; } = new MapFabric(1);
+    private static MapFabric _MapFabric { get; set; }
+
+    public int GenerationSeed = 1;
 
     public int Width = 10;
 
@@ -48,6 +50,8 @@ public class MapGenerationScript : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        _MapFabric = new MapFabric(GenerationSeed);
+
         _ObjectsFabric = GetComponent<MapObjectFabricScript>();
 
         if (_ObjectsFabric is not null)
@@ -88,13 +92,16 @@ public class MapGenerationScript : MonoBehaviour
 
         void _SetParent(GameObject newObject)
         {
-            var thisGameObjectTransformComponent = this.GetComponent<Transform>();
-            var newGameObjectTransformComponent = newObject.GetComponent<Transform>();
-
-            if (thisGameObjectTransformComponent is not null
-                && newGameObjectTransformComponent is not null)
+            if (newObject is not null)
             {
-                newGameObjectTransformComponent.parent = thisGameObjectTransformComponent;
+                var thisGameObjectTransformComponent = this.GetComponent<Transform>();
+                var newGameObjectTransformComponent = newObject.GetComponent<Transform>();
+
+                if (thisGameObjectTransformComponent is not null
+                    && newGameObjectTransformComponent is not null)
+                {
+                    newGameObjectTransformComponent.parent = thisGameObjectTransformComponent;
+                }
             }
         }
 
@@ -105,8 +112,11 @@ public class MapGenerationScript : MonoBehaviour
             var wallScale = new Vector3(WallWidth, actualWallHeight, actualWallLength);
 
             var newWall = _ObjectsFabric.CreateWall(wallLocation, wallQuanterion, wallScale);
-
-            newWall.name = $"Wall";
+            
+            if (newWall is not null)
+            {
+                newWall.name = $"WallPillar";
+            }
 
             _SetParent(newWall);
         }
@@ -117,9 +127,12 @@ public class MapGenerationScript : MonoBehaviour
             var pillarQuanterion = Quaternion.Euler(0, 0, 0);
             var pillarScale = new Vector3(WallWidth, actualWallHeight, WallWidth);
 
-            var newPillar = _ObjectsFabric.CreateWall(pillarLocation, pillarQuanterion, pillarScale);
+            var newPillar = _ObjectsFabric.CreatePillar(pillarLocation, pillarQuanterion, pillarScale);
 
-            newPillar.name = $"WallPillar";
+            if (newPillar is not null)
+            {
+                newPillar.name = $"WallPillar";
+            }
 
             _SetParent(newPillar);
         }
@@ -132,7 +145,10 @@ public class MapGenerationScript : MonoBehaviour
 
             var newFloor = _ObjectsFabric.CreateFloor(floorLocation, floorQuanterion, floorScale);
 
-            newFloor.name = $"Floor";
+            if (newFloor is not null)
+            {
+                newFloor.name = $"Floor";
+            }
 
             _SetParent(newFloor);
         }
@@ -145,7 +161,10 @@ public class MapGenerationScript : MonoBehaviour
 
             var newRoof = _ObjectsFabric.CreateRoof(roofLocation, roofQuanterion, roofScale);
 
-            newRoof.name = $"Roof";
+            if (newRoof is not null)
+            {
+                newRoof.name = $"Floor";
+            }
 
             _SetParent(newRoof);
         }
