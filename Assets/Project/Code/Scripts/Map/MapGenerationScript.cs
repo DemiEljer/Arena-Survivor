@@ -2,6 +2,8 @@ using UnityEngine;
 using MapGenearionLibrary;
 using System;
 using Unity.VisualScripting;
+using Assets.Project.Code.Scripts.Map;
+using System.Collections.Generic;
 
 public class MapGenerationScript : MonoBehaviour
 {
@@ -33,191 +35,60 @@ public class MapGenerationScript : MonoBehaviour
 
     public float RoofHeight = 0.1f;
 
-    public bool DoesGenerateWalls = false;
+    public Map Map { get; private set; }
 
-    public bool DoesGenerateFloor = false;
-
-    public bool DoesGenerateRoof = false;
-
-    private MapObjectFabricScript _ObjectsFabric = null;
+    public event Action<MapGenerationScript> MapHasBeenGeneratedEvent;
 
     private MapGenerationConfig _Config { get; } = new();
-
-    public Map Map { get; set; }
-
-    public event Action<MapGenerationScript>? MapHasBeenGeneratedEvent;
+    private List<AMapObjectGenerationScript> _ObjectGenerators { get; } = new();
+    private bool _MapHasBeenGenerated { get; set; } = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        _MapFabric = new MapFabric(GenerationSeed);
-
-        _ObjectsFabric = GetComponent<MapObjectFabricScript>();
-
-        if (_ObjectsFabric is not null)
+        if (_MapFabric is null)
         {
-            _Config.Width = Width;
-            _Config.Height = Height;
-            _Config.MaxLayerCount = MaxLayerCount;
-            _Config.MinRoomWidth = MinRoomWidth;
-            _Config.MinRoomHeight = MinRoomHeight;
-            _Config.MaxDoorsCount = MaxDoorsCount;
-            _Config.IsRandomDoorsCount = IsRandomDoorsCount;
-
-            Map = _MapFabric.GenerateMap(_Config);
-            _MapFabric.SetMapBorderWalls(Map);
-
-            _CreateMapObjects();
-
-            Debug.Log("Карта была сгенерирована");
-
-            MapHasBeenGeneratedEvent?.Invoke(this);
+            _MapFabric = new MapFabric(GenerationSeed);
         }
-        else
-        {
-            Debug.Log("Не был обнаружен фабрикатор объектов");
-        }
+
+        _Config.Width = Width;
+        _Config.Height = Height;
+        _Config.MaxLayerCount = MaxLayerCount;
+        _Config.MinRoomWidth = MinRoomWidth;
+        _Config.MinRoomHeight = MinRoomHeight;
+        _Config.MaxDoorsCount = MaxDoorsCount;
+        _Config.IsRandomDoorsCount = IsRandomDoorsCount;
+
+        Map = _MapFabric.GenerateMap(_Config);
+        _MapFabric.SetMapBorderWalls(Map);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (!_MapHasBeenGenerated)
+        {
+            _CreateMapObjects();
+
+            Debug.Log("Карта была сгенерирована");
+
+            MapHasBeenGeneratedEvent?.Invoke(this);
+
+            _MapHasBeenGenerated = true;
+        }
+    }
+
+    public void AppendGenerator(AMapObjectGenerationScript generator)
+    {
+        _ObjectGenerators.Add(generator);
     }
 
     private void _CreateMapObjects()
     {
-        float actualWallLength = CellSize - WallWidth;
-        float actualWallHeight = WallHeight;
-
-        void _SetParent(GameObject newObject)
+        foreach (var generator in _ObjectGenerators)
         {
-            if (newObject is not null)
-            {
-                var thisGameObjectTransformComponent = this.GetComponent<Transform>();
-                var newGameObjectTransformComponent = newObject.GetComponent<Transform>();
-
-                if (thisGameObjectTransformComponent is not null
-                    && newGameObjectTransformComponent is not null)
-                {
-                    newGameObjectTransformComponent.parent = thisGameObjectTransformComponent;
-                }
-            }
+            generator.Generate(this);
         }
-
-        void _CreateWall(float xLocation, float zLocation, float yRotation)
-        {
-            var wallLocation = new Vector3(xLocation, WallHeight / 2.0f, zLocation);
-            var wallQuanterion = Quaternion.Euler(0, yRotation, 0);
-            var wallScale = new Vector3(WallWidth, actualWallHeight, actualWallLength);
-
-            var newWall = _ObjectsFabric.CreateWall(wallLocation, wallQuanterion, wallScale);
-            
-            if (newWall is not null)
-            {
-                newWall.name = $"WallPillar";
-            }
-
-            _SetParent(newWall);
-        }
-
-        void _CreateWallPillar(float xLocation, float zLocation)
-        {
-            var pillarLocation = new Vector3(xLocation, WallHeight / 2.0f, zLocation);
-            var pillarQuanterion = Quaternion.Euler(0, 0, 0);
-            var pillarScale = new Vector3(WallWidth, actualWallHeight, WallWidth);
-
-            var newPillar = _ObjectsFabric.CreatePillar(pillarLocation, pillarQuanterion, pillarScale);
-
-            if (newPillar is not null)
-            {
-                newPillar.name = $"WallPillar";
-            }
-
-            _SetParent(newPillar);
-        }
-
-        void _CreateFloor(float xLocation, float zLocation)
-        {
-            var floorLocation = new Vector3(xLocation, 0, zLocation);
-            var floorQuanterion = Quaternion.Euler(0, 0, 0);
-            var floorScale = new Vector3(CellSize, FloorHeight, CellSize);
-
-            var newFloor = _ObjectsFabric.CreateFloor(floorLocation, floorQuanterion, floorScale);
-
-            if (newFloor is not null)
-            {
-                newFloor.name = $"Floor";
-            }
-
-            _SetParent(newFloor);
-        }
-
-        void _CreateRoof(float xLocation, float zLocation)
-        {
-            var roofLocation = new Vector3(xLocation, actualWallHeight, zLocation);
-            var roofQuanterion = Quaternion.Euler(0, 0, 0);
-            var roofScale = new Vector3(CellSize, RoofHeight, CellSize);
-
-            var newRoof = _ObjectsFabric.CreateRoof(roofLocation, roofQuanterion, roofScale);
-
-            if (newRoof is not null)
-            {
-                newRoof.name = $"Floor";
-            }
-
-            _SetParent(newRoof);
-        }
-
-        Map.Foreach((point, cell) =>
-        {
-            if (DoesGenerateWalls)
-            {
-                if (cell.BottomWall && point.Y == (Map.Height - 1))
-                {
-                    _CreateWall((float)point.X * CellSize + CellSize / 2.0f, (float)(point.Y + 1) * CellSize, 90);
-                }
-                if (cell.TopWall)
-                {
-                    _CreateWall((float)point.X * CellSize + CellSize / 2.0f, (float)(point.Y) * CellSize, 270);
-                }
-                if (cell.LeftWall)
-                {
-                    _CreateWall((float)(point.X) * CellSize, (float)point.Y * CellSize + CellSize / 2.0f, 0);
-                }
-                if (cell.RightWall && point.X == (Map.Width - 1))
-                {
-                    _CreateWall((float)(point.X + 1) * CellSize, (float)point.Y * CellSize + CellSize / 2.0f, 180);
-                }
-
-                var prevDiagCell = Map.GetCell(point.X - 1, point.Y - 1);
-
-                if (cell.TopWall || cell.LeftWall || prevDiagCell.BottomWall || prevDiagCell.RightWall)
-                {
-                    _CreateWallPillar((float)point.X * CellSize, (float)point.Y * CellSize);
-                }
-
-                if ((cell.TopWall || cell.RightWall) && point.X == (Map.Width - 1))
-                {
-                    _CreateWallPillar((float)(point.X + 1) * CellSize, (float)point.Y * CellSize);
-                }
-
-                if ((cell.BottomWall || cell.RightWall) && point.Y == (Map.Height - 1))
-                {
-                    _CreateWallPillar((float)(point.X + 1) * CellSize, (float)(point.Y + 1) * CellSize);
-                }
-            }
-
-            if (DoesGenerateFloor)
-            {
-                _CreateFloor((float)point.X * CellSize + CellSize / 2.0f, (float)point.Y * CellSize + CellSize / 2.0f);
-            }
-
-            if (DoesGenerateRoof)
-            {
-                _CreateRoof((float)point.X * CellSize + CellSize / 2.0f, (float)point.Y * CellSize + CellSize / 2.0f);
-            }
-        });
     }
 
     public Vector3 GetSpawnPoint() => new Vector3((float)Map.Width * CellSize / 2.0f, WallHeight / 2.0f, (float)Map.Width * CellSize / 2.0f);

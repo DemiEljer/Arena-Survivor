@@ -2,14 +2,13 @@ using UnityEngine;
 
 public class PlayerMapSpawnScript : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public GameObject MapOwner;
+
     void Start()
     {
-        var mapOwnerObject = GameObject.Find("MapOwner");
-
-        if (mapOwnerObject is not null)
+        if (MapOwner is not null)
         {
-            var mapHandlerScript = mapOwnerObject.GetComponent<MapGenerationScript>();
+            var mapHandlerScript = MapOwner.GetComponent<MapGenerationScript>();
 
             if (mapHandlerScript is not null)
             {
@@ -18,7 +17,7 @@ public class PlayerMapSpawnScript : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
+
     void Update()
     {
         
