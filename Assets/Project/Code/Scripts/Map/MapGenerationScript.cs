@@ -11,37 +11,10 @@ public class MapGenerationScript : MonoBehaviour
     private static MapFabric _MapFabric { get; set; }
 
     public int GenerationSeed = 1;
-
-    public int Width = 10;
-
-    public int Height = 10;
-
-    public int MaxLayerCount = -1;
-
-    public int MinRoomWidth = -1;
-
-    public int MinRoomHeight = -1;
-
-    public int MaxDoorsCount = -1;
-    
-    public bool IsRandomDoorsCount = true;
-
-    public float CellSize = 1.0f;
-
-    public float WallWidth = 0.1f;
-
-    public float WallHeight = 1.0f;
-
-    public float FloorHeight = 0.1f;
-
-    public float RoofHeight = 0.1f;
-
+    public MapParamsScript Params { get; private set; }
     public Map Map { get; private set; }
-
     public MapNavigationHandler MapNavigation { get; private set; }
-
     public MapObjectLocationHandler ObjectLocations { get; private set; }
-
     public event Action<MapGenerationScript> MapHasBeenGeneratedEvent;
 
     private MapGenerationConfig _Config { get; } = new();
@@ -58,14 +31,18 @@ public class MapGenerationScript : MonoBehaviour
         }
 
         _MapOwnerTransform = this.GetComponent<Transform>();
-
-        _Config.Width = Width;
-        _Config.Height = Height;
-        _Config.MaxLayerCount = MaxLayerCount;
-        _Config.MinRoomWidth = MinRoomWidth;
-        _Config.MinRoomHeight = MinRoomHeight;
-        _Config.MaxDoorsCount = MaxDoorsCount;
-        _Config.IsRandomDoorsCount = IsRandomDoorsCount;
+        Params = this.GetComponent<MapParamsScript>();
+        
+        if (Params is not null)
+        {
+            _Config.Width = Params.Width;
+            _Config.Height = Params.Height;
+            _Config.MaxLayerCount = Params.MaxLayerCount;
+            _Config.MinRoomWidth = Params.MinRoomWidth;
+            _Config.MinRoomHeight = Params.MinRoomHeight;
+            _Config.MaxDoorsCount = Params.MaxDoorsCount;
+            _Config.IsRandomDoorsCount = Params.IsRandomDoorsCount;
+        }
 
         Map = _MapFabric.GenerateMap(_Config);
         _MapFabric.SetMapBorderWalls(Map);
@@ -101,7 +78,7 @@ public class MapGenerationScript : MonoBehaviour
         }
     }
 
-    public Vector3 GetSpawnPoint() => new Vector3((float)Map.Width * CellSize / 2.0f, WallHeight / 2.0f, (float)Map.Width * CellSize / 2.0f);
+    public Vector3 GetSpawnPoint() => new Vector3((float)Map.Width * Params.CellSize / 2.0f, Params.WallHeight / 2.0f, (float)Map.Width * Params.CellSize / 2.0f);
 
     public void AppendObjectAsChild(GameObject childObject)
     {

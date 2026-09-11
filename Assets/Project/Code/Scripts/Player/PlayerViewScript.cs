@@ -36,18 +36,14 @@ public class PlayerViewScript : MonoBehaviour
         if (_PlayerBodyTransform is not null
             && _PlayerHeadTransform is not null)
         {
-            // Получаем ввод движения мыши за текущий кадр
-            float mouseX = Input.GetAxis("Mouse X") * MouseSensitivity * Time.deltaTime;
-            float mouseY = Input.GetAxis("Mouse Y") * MouseSensitivity * Time.deltaTime;
+            var mouseX = Input.GetAxis("Mouse X") * MouseSensitivity * Time.deltaTime;
+            var mouseY = Input.GetAxis("Mouse Y") * MouseSensitivity * Time.deltaTime;
 
-            // Рассчитываем поворот по вертикали и ограничиваем его (чтобы не смотреть "внутрь" себя)
             _XRotation -= mouseY;
             _XRotation = Mathf.Clamp(_XRotation, -90f, 60f);
 
-            // Поворачиваем саму камеру вверх и вниз
             _PlayerHeadTransform.localRotation = Quaternion.Euler(_XRotation, 0f, 0f);
 
-            // Поворачиваем тело игрока влево и вправо
             _PlayerBodyTransform.Rotate(new Vector3(0, 1.0f, 0) * mouseX);
         }
     }

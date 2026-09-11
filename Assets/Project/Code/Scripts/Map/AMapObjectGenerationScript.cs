@@ -25,7 +25,7 @@ namespace Assets.Project.Code.Scripts.Map
 
         public void Generate(MapGenerationScript mapGenerationScript)
         {
-            if (mapGenerationScript is not null)
+            if (mapGenerationScript is not null && mapGenerationScript.Params is not null)
             {
                 _Generate(mapGenerationScript);
             }

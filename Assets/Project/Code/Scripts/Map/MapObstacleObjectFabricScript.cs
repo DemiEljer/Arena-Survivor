@@ -7,11 +7,8 @@ using UnityEngine.UIElements;
 public class MapObstacleObjectFabricScript : AMapObjectFabricScript
 {
     public GameObject[] WallsPrefabs = Array.Empty<GameObject>();
-
     public GameObject[] PillarsPrefabs = Array.Empty<GameObject>();
-
     public GameObject[] FloorPrefabs = Array.Empty<GameObject>();
-
     public GameObject[] RoofPrefabs = Array.Empty<GameObject>();
 
     private CollectionIndexCyclicalIterator _WallIterator { get; } = new();

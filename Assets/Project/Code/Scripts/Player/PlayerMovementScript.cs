@@ -20,9 +20,8 @@ public class PlayerMovementScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float moveHorizontal = Input.GetAxis("Horizontal");
-        float moveVertical = Input.GetAxis("Vertical");
-
+        var moveHorizontal = Input.GetAxis("Horizontal");
+        var moveVertical = Input.GetAxis("Vertical");
         var currentSpeed = Input.GetButton("Sprint") ? ExtendedSpeed : Speed;
 
         Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical) * currentSpeed;

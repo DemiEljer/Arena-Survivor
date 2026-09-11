@@ -33,20 +33,20 @@ namespace Assets.Project.Code.Scripts.Map
             }
 
             var map = mapGenerationScript.Map;
-            float actualWallLength = mapGenerationScript.CellSize - mapGenerationScript.WallWidth;
-            float actualWallHeight = mapGenerationScript.WallHeight;
+            float actualWallLength = mapGenerationScript.Params.CellSize - mapGenerationScript.Params.WallWidth;
+            float actualWallHeight = mapGenerationScript.Params.WallHeight;
 
             void _CreateWall(MapPoint point, MapObjectOrientationEnum wallOrientation)
             {
                 Vector3 wallLocation = mapGenerationScript.ObjectLocations.GetWallLocation(point, wallOrientation);
                 Quaternion wallQuanterion = mapGenerationScript.ObjectLocations.GetObjectRotation(wallOrientation);
-                var wallScale = new Vector3(mapGenerationScript.WallWidth, actualWallHeight, actualWallLength);
+                var wallScale = new Vector3(mapGenerationScript.Params.WallWidth, actualWallHeight, actualWallLength);
 
                 var newWall = _ObjectsFabric.CreateWall(wallLocation, wallQuanterion, wallScale);
 
                 if (newWall is not null)
                 {
-                    newWall.name = $"WallPillar";
+                    newWall.name = $"Wall";
                 }
 
                 mapGenerationScript.AppendObjectAsChild(newWall);
@@ -56,7 +56,7 @@ namespace Assets.Project.Code.Scripts.Map
             {
                 Vector3 pillarLocation = mapGenerationScript.ObjectLocations.GetPillarLocation(point, pillarOrientation);
                 var pillarQuanterion = Quaternion.Euler(0, 0, 0);
-                var pillarScale = new Vector3(mapGenerationScript.WallWidth, actualWallHeight, mapGenerationScript.WallWidth);
+                var pillarScale = new Vector3(mapGenerationScript.Params.WallWidth, actualWallHeight, mapGenerationScript.Params.WallWidth);
 
                 var newPillar = _ObjectsFabric.CreatePillar(pillarLocation, pillarQuanterion, pillarScale);
 
@@ -72,7 +72,7 @@ namespace Assets.Project.Code.Scripts.Map
             {
                 Vector3 floorLocation = mapGenerationScript.ObjectLocations.GetFloorLocation(point); ;
                 var floorQuanterion = Quaternion.Euler(0, 0, 0);
-                var floorScale = new Vector3(mapGenerationScript.CellSize, mapGenerationScript.FloorHeight, mapGenerationScript.CellSize);
+                var floorScale = new Vector3(mapGenerationScript.Params.CellSize, mapGenerationScript.Params.FloorHeight, mapGenerationScript.Params.CellSize);
 
                 var newFloor = _ObjectsFabric.CreateFloor(floorLocation, floorQuanterion, floorScale);
 
@@ -88,13 +88,13 @@ namespace Assets.Project.Code.Scripts.Map
             {
                 Vector3 roofLocation = mapGenerationScript.ObjectLocations.GetRoofLocation(point);
                 var roofQuanterion = Quaternion.Euler(0, 0, 0);
-                var roofScale = new Vector3(mapGenerationScript.CellSize, mapGenerationScript.RoofHeight, mapGenerationScript.CellSize);
+                var roofScale = new Vector3(mapGenerationScript.Params.CellSize, mapGenerationScript.Params.RoofHeight, mapGenerationScript.Params.CellSize);
 
                 var newRoof = _ObjectsFabric.CreateRoof(roofLocation, roofQuanterion, roofScale);
 
                 if (newRoof is not null)
                 {
-                    newRoof.name = $"Floor";
+                    newRoof.name = $"Roof";
                 }
 
                 mapGenerationScript.AppendObjectAsChild(newRoof);

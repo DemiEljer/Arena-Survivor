@@ -23,32 +23,32 @@ namespace Assets.Project.Code.Scripts.Map
             switch (wallOrientation)
             {
                 case MapObjectOrientationEnum.Left: return new Vector3(
-                    (float)(point.X) * _MapGenerationScript.CellSize
+                    (float)(point.X) * _MapGenerationScript.Params.CellSize
                     , 
-                    _MapGenerationScript.WallHeight / 2.0f
+                    _MapGenerationScript.Params.WallHeight / 2.0f
                     , 
-                    (float)(point.Y) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f);
+                    (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f);
 
                 case MapObjectOrientationEnum.Bottom: return new Vector3(
-                    (float)(point.X) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f
+                    (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f
                     ,
-                    _MapGenerationScript.WallHeight / 2.0f
+                    _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y + 1) * _MapGenerationScript.CellSize);
+                    (float)(point.Y + 1) * _MapGenerationScript.Params.CellSize);
 
                 case MapObjectOrientationEnum.Right: return new Vector3(
-                    (float)(point.X + 1) * _MapGenerationScript.CellSize
+                    (float)(point.X + 1) * _MapGenerationScript.Params.CellSize
                     ,
-                    _MapGenerationScript.WallHeight / 2.0f
+                    _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f);
+                    (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f);
 
                 case MapObjectOrientationEnum.Top: return new Vector3(
-                    (float)(point.X) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f
+                    (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f
                     ,
-                    _MapGenerationScript.WallHeight / 2.0f
+                    _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y) * _MapGenerationScript.CellSize);
+                    (float)(point.Y) * _MapGenerationScript.Params.CellSize);
 
                 default: throw new ArgumentException();
             }
@@ -72,35 +72,35 @@ namespace Assets.Project.Code.Scripts.Map
             {
                 case MapObjectOrientationEnum.Left:
                     return new Vector3(
-                    (float)(point.X) * _MapGenerationScript.CellSize + _MapGenerationScript.WallWidth / 2.0f
+                    (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.WallWidth / 2.0f
                     ,
-                    _MapGenerationScript.WallHeight / 2.0f
+                    _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f);
+                    (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f);
 
                 case MapObjectOrientationEnum.Bottom:
                     return new Vector3(
-                    (float)(point.X) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f
+                    (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f
                     ,
-                    _MapGenerationScript.WallHeight / 2.0f
+                    _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y + 1) * _MapGenerationScript.CellSize - _MapGenerationScript.WallWidth / 2.0f);
+                    (float)(point.Y + 1) * _MapGenerationScript.Params.CellSize - _MapGenerationScript.Params.WallWidth / 2.0f);
 
                 case MapObjectOrientationEnum.Right:
                     return new Vector3(
-                    (float)(point.X + 1) * _MapGenerationScript.CellSize - _MapGenerationScript.WallWidth / 2.0f
+                    (float)(point.X + 1) * _MapGenerationScript.Params.CellSize - _MapGenerationScript.Params.WallWidth / 2.0f
                     ,
-                    _MapGenerationScript.WallHeight / 2.0f
+                    _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f);
+                    (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f);
 
                 case MapObjectOrientationEnum.Top:
                     return new Vector3(
-                    (float)(point.X) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f
+                    (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f
                     ,
-                    _MapGenerationScript.WallHeight / 2.0f
+                    _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y) * _MapGenerationScript.CellSize + _MapGenerationScript.WallWidth / 2.0f);
+                    (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.WallWidth / 2.0f);
 
                 default: throw new ArgumentException();
             }
@@ -112,73 +112,73 @@ namespace Assets.Project.Code.Scripts.Map
             {
                 case MapObjectOrientationEnum.TopLeft:
                     return new Vector3(
-                    (float)(point.X) * _MapGenerationScript.CellSize
+                    (float)(point.X) * _MapGenerationScript.Params.CellSize
                     ,
-                    _MapGenerationScript.WallHeight / 2.0f
+                    _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y) * _MapGenerationScript.CellSize);
+                    (float)(point.Y) * _MapGenerationScript.Params.CellSize);
 
                 case MapObjectOrientationEnum.TopRight:
                     return new Vector3(
-                    (float)(point.X + 1) * _MapGenerationScript.CellSize
+                    (float)(point.X + 1) * _MapGenerationScript.Params.CellSize
                     ,
-                    _MapGenerationScript.WallHeight / 2.0f
+                    _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y) * _MapGenerationScript.CellSize);
+                    (float)(point.Y) * _MapGenerationScript.Params.CellSize);
 
                 case MapObjectOrientationEnum.BottomLeft:
                     return new Vector3(
-                    (float)(point.X) * _MapGenerationScript.CellSize
+                    (float)(point.X) * _MapGenerationScript.Params.CellSize
                     ,
-                    _MapGenerationScript.WallHeight / 2.0f
+                    _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y + 1) * _MapGenerationScript.CellSize);
+                    (float)(point.Y + 1) * _MapGenerationScript.Params.CellSize);
 
                 case MapObjectOrientationEnum.BottomRight:
                     return new Vector3(
-                    (float)(point.X + 1) * _MapGenerationScript.CellSize
+                    (float)(point.X + 1) * _MapGenerationScript.Params.CellSize
                     ,
-                    _MapGenerationScript.WallHeight / 2.0f
+                    _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y + 1) * _MapGenerationScript.CellSize);
+                    (float)(point.Y + 1) * _MapGenerationScript.Params.CellSize);
 
                 default: throw new ArgumentException();
             }
         }
 
         public Vector3 GetCellCentralLocation(MapPoint point) => new Vector3(
-            (float)(point.X) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f
+            (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f
             ,
-            _MapGenerationScript.WallHeight / 2.0f
+            _MapGenerationScript.Params.WallHeight / 2.0f
             ,
-            (float)(point.Y) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f);
+            (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f);
 
         public Vector3 GetFloorLocation(MapPoint point) => new Vector3(
-            (float)(point.X) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f
+            (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f
             ,
             0
             ,
-            (float)point.Y * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f);
+            (float)point.Y * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f);
 
         public Vector3 GetRoofLocation(MapPoint point) => new Vector3(
-            (float)(point.X) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f
+            (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f
             ,
-            _MapGenerationScript.WallHeight
+            _MapGenerationScript.Params.WallHeight
             ,
-            (float)(point.Y) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f);
+            (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f);
 
         public Vector3 GetFloorCentralSurfaceLocation(MapPoint point) => new Vector3(
-            (float)(point.X) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f
+            (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f
             ,
-            _MapGenerationScript.FloorHeight / 2.0f
+            _MapGenerationScript.Params.FloorHeight / 2.0f
             ,
-            (float)(point.Y) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f);
+            (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f);
 
         public Vector3 GetRoofCentralSurfaceLocation(MapPoint point) => new Vector3(
-            (float)(point.X) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f
+            (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f
             ,
-            _MapGenerationScript.WallHeight - _MapGenerationScript.RoofHeight / 2.0f
+            _MapGenerationScript.Params.WallHeight - _MapGenerationScript.Params.RoofHeight / 2.0f
             ,
-            (float)(point.Y) * _MapGenerationScript.CellSize + _MapGenerationScript.CellSize / 2.0f);
+            (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f);
     }
 }
