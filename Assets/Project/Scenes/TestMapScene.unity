@@ -281,6 +281,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ec37d7fa04816443bb1a3a272369fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMapSpawnScript
+  MapOwner: {fileID: 1849053987}
 --- !u!4 &1258016254
 Transform:
   m_ObjectHideFlags: 0
@@ -636,6 +637,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1849053988}
   - component: {fileID: 1849053990}
+  - component: {fileID: 1849053991}
   - component: {fileID: 1849053989}
   m_Layer: 0
   m_Name: MapOwner
@@ -694,9 +696,9 @@ MonoBehaviour:
   GenerationSeed: 2
   Width: 20
   Height: 20
-  MaxLayerCount: 7
-  MinRoomWidth: -1
-  MinRoomHeight: -1
+  MaxLayerCount: -1
+  MinRoomWidth: 2
+  MinRoomHeight: 2
   MaxDoorsCount: 3
   IsRandomDoorsCount: 1
   CellSize: 1
@@ -704,6 +706,18 @@ MonoBehaviour:
   WallHeight: 1.2
   FloorHeight: 0.1
   RoofHeight: 0.1
+--- !u!114 &1849053991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849053987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee6411147b499d447b373cc600fe5dc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.MapObstacleGenerationScript
   DoesGenerateWalls: 1
   DoesGenerateFloor: 1
   DoesGenerateRoof: 0

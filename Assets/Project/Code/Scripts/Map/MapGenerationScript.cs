@@ -4,6 +4,7 @@ using System;
 using Unity.VisualScripting;
 using Assets.Project.Code.Scripts.Map;
 using System.Collections.Generic;
+using MapGenearionLibrary.Navigation;
 
 public class MapGenerationScript : MonoBehaviour
 {
@@ -37,11 +38,16 @@ public class MapGenerationScript : MonoBehaviour
 
     public Map Map { get; private set; }
 
+    public MapNavigationHandler MapNavigation { get; private set; }
+
+    public MapObjectLocationHandler ObjectLocations { get; private set; }
+
     public event Action<MapGenerationScript> MapHasBeenGeneratedEvent;
 
     private MapGenerationConfig _Config { get; } = new();
     private List<AMapObjectGenerationScript> _ObjectGenerators { get; } = new();
     private bool _MapHasBeenGenerated { get; set; } = false;
+    private Transform _MapOwnerTransform { get; set; }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -50,6 +56,8 @@ public class MapGenerationScript : MonoBehaviour
         {
             _MapFabric = new MapFabric(GenerationSeed);
         }
+
+        _MapOwnerTransform = this.GetComponent<Transform>();
 
         _Config.Width = Width;
         _Config.Height = Height;
@@ -61,6 +69,8 @@ public class MapGenerationScript : MonoBehaviour
 
         Map = _MapFabric.GenerateMap(_Config);
         _MapFabric.SetMapBorderWalls(Map);
+        MapNavigation = new MapNavigationHandler(Map);
+        ObjectLocations = new MapObjectLocationHandler(this);
     }
 
     // Update is called once per frame
@@ -92,4 +102,14 @@ public class MapGenerationScript : MonoBehaviour
     }
 
     public Vector3 GetSpawnPoint() => new Vector3((float)Map.Width * CellSize / 2.0f, WallHeight / 2.0f, (float)Map.Width * CellSize / 2.0f);
+
+    public void AppendObjectAsChild(GameObject childObject)
+    {
+        var childObjectTransform = childObject?.GetComponent<Transform>();
+
+        if (childObjectTransform is not null)
+        {
+            childObjectTransform.parent = _MapOwnerTransform;
+        }
+    }
 }

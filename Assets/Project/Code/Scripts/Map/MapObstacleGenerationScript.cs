@@ -1,5 +1,8 @@
-﻿using System;
+﻿using MapGenearionLibrary.Base;
+using MapGenearionLibrary.Enums;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,25 +36,10 @@ namespace Assets.Project.Code.Scripts.Map
             float actualWallLength = mapGenerationScript.CellSize - mapGenerationScript.WallWidth;
             float actualWallHeight = mapGenerationScript.WallHeight;
 
-            void _SetParent(GameObject newObject)
+            void _CreateWall(MapPoint point, MapObjectOrientationEnum wallOrientation)
             {
-                if (newObject is not null)
-                {
-                    var thisGameObjectTransformComponent = this.GetComponent<Transform>();
-                    var newGameObjectTransformComponent = newObject.GetComponent<Transform>();
-
-                    if (thisGameObjectTransformComponent is not null
-                        && newGameObjectTransformComponent is not null)
-                    {
-                        newGameObjectTransformComponent.parent = thisGameObjectTransformComponent;
-                    }
-                }
-            }
-
-            void _CreateWall(float xLocation, float zLocation, float yRotation)
-            {
-                var wallLocation = new Vector3(xLocation, mapGenerationScript.WallHeight / 2.0f, zLocation);
-                var wallQuanterion = Quaternion.Euler(0, yRotation, 0);
+                Vector3 wallLocation = mapGenerationScript.ObjectLocations.GetWallLocation(point, wallOrientation);
+                Quaternion wallQuanterion = mapGenerationScript.ObjectLocations.GetObjectRotation(wallOrientation);
                 var wallScale = new Vector3(mapGenerationScript.WallWidth, actualWallHeight, actualWallLength);
 
                 var newWall = _ObjectsFabric.CreateWall(wallLocation, wallQuanterion, wallScale);
@@ -61,12 +49,12 @@ namespace Assets.Project.Code.Scripts.Map
                     newWall.name = $"WallPillar";
                 }
 
-                _SetParent(newWall);
+                mapGenerationScript.AppendObjectAsChild(newWall);
             }
 
-            void _CreateWallPillar(float xLocation, float zLocation)
+            void _CreateWallPillar(MapPoint point, MapObjectOrientationEnum pillarOrientation)
             {
-                var pillarLocation = new Vector3(xLocation, mapGenerationScript.WallHeight / 2.0f, zLocation);
+                Vector3 pillarLocation = mapGenerationScript.ObjectLocations.GetPillarLocation(point, pillarOrientation);
                 var pillarQuanterion = Quaternion.Euler(0, 0, 0);
                 var pillarScale = new Vector3(mapGenerationScript.WallWidth, actualWallHeight, mapGenerationScript.WallWidth);
 
@@ -77,12 +65,12 @@ namespace Assets.Project.Code.Scripts.Map
                     newPillar.name = $"WallPillar";
                 }
 
-                _SetParent(newPillar);
+                mapGenerationScript.AppendObjectAsChild(newPillar);
             }
 
-            void _CreateFloor(float xLocation, float zLocation)
+            void _CreateFloor(MapPoint point)
             {
-                var floorLocation = new Vector3(xLocation, 0, zLocation);
+                Vector3 floorLocation = mapGenerationScript.ObjectLocations.GetFloorLocation(point); ;
                 var floorQuanterion = Quaternion.Euler(0, 0, 0);
                 var floorScale = new Vector3(mapGenerationScript.CellSize, mapGenerationScript.FloorHeight, mapGenerationScript.CellSize);
 
@@ -93,12 +81,12 @@ namespace Assets.Project.Code.Scripts.Map
                     newFloor.name = $"Floor";
                 }
 
-                _SetParent(newFloor);
+                mapGenerationScript.AppendObjectAsChild(newFloor);
             }
 
-            void _CreateRoof(float xLocation, float zLocation)
+            void _CreateRoof(MapPoint point)
             {
-                var roofLocation = new Vector3(xLocation, actualWallHeight, zLocation);
+                Vector3 roofLocation = mapGenerationScript.ObjectLocations.GetRoofLocation(point);
                 var roofQuanterion = Quaternion.Euler(0, 0, 0);
                 var roofScale = new Vector3(mapGenerationScript.CellSize, mapGenerationScript.RoofHeight, mapGenerationScript.CellSize);
 
@@ -109,7 +97,7 @@ namespace Assets.Project.Code.Scripts.Map
                     newRoof.name = $"Floor";
                 }
 
-                _SetParent(newRoof);
+                mapGenerationScript.AppendObjectAsChild(newRoof);
             }
 
             map.Foreach((point, cell) =>
@@ -118,47 +106,47 @@ namespace Assets.Project.Code.Scripts.Map
                 {
                     if (cell.BottomWall && point.Y == (map.Height - 1))
                     {
-                        _CreateWall((float)point.X * mapGenerationScript.CellSize + mapGenerationScript.CellSize / 2.0f, (float)(point.Y + 1) * mapGenerationScript.CellSize, 90);
+                        _CreateWall(point, MapObjectOrientationEnum.Bottom);
                     }
                     if (cell.TopWall)
                     {
-                        _CreateWall((float)point.X * mapGenerationScript.CellSize + mapGenerationScript.CellSize / 2.0f, (float)(point.Y) * mapGenerationScript.CellSize, 270);
+                        _CreateWall(point, MapObjectOrientationEnum.Top);
                     }
                     if (cell.LeftWall)
                     {
-                        _CreateWall((float)(point.X) * mapGenerationScript.CellSize, (float)point.Y * mapGenerationScript.CellSize + mapGenerationScript.CellSize / 2.0f, 0);
+                        _CreateWall(point, MapObjectOrientationEnum.Left);
                     }
                     if (cell.RightWall && point.X == (map.Width - 1))
                     {
-                        _CreateWall((float)(point.X + 1) * mapGenerationScript.CellSize, (float)point.Y * mapGenerationScript.CellSize + mapGenerationScript.CellSize / 2.0f, 180);
+                        _CreateWall(point, MapObjectOrientationEnum.Right);
                     }
 
                     var prevDiagCell = map.GetCell(point.X - 1, point.Y - 1);
 
                     if (cell.TopWall || cell.LeftWall || prevDiagCell.BottomWall || prevDiagCell.RightWall)
                     {
-                        _CreateWallPillar((float)point.X * mapGenerationScript.CellSize, (float)point.Y * mapGenerationScript.CellSize);
+                        _CreateWallPillar(point, MapObjectOrientationEnum.TopLeft);
                     }
 
                     if ((cell.TopWall || cell.RightWall) && point.X == (map.Width - 1))
                     {
-                        _CreateWallPillar((float)(point.X + 1) * mapGenerationScript.CellSize, (float)point.Y * mapGenerationScript.CellSize);
+                        _CreateWallPillar(point, MapObjectOrientationEnum.TopRight);
                     }
 
                     if ((cell.BottomWall || cell.RightWall) && point.Y == (map.Height - 1))
                     {
-                        _CreateWallPillar((float)(point.X + 1) * mapGenerationScript.CellSize, (float)(point.Y + 1) * mapGenerationScript.CellSize);
+                        _CreateWallPillar(point, MapObjectOrientationEnum.BottomRight);
                     }
                 }
 
                 if (DoesGenerateFloor)
                 {
-                    _CreateFloor((float)point.X * mapGenerationScript.CellSize + mapGenerationScript.CellSize / 2.0f, (float)point.Y * mapGenerationScript.CellSize + mapGenerationScript.CellSize / 2.0f);
+                    _CreateFloor(point);
                 }
 
                 if (DoesGenerateRoof)
                 {
-                    _CreateRoof((float)point.X * mapGenerationScript.CellSize + mapGenerationScript.CellSize / 2.0f, (float)point.Y * mapGenerationScript.CellSize + mapGenerationScript.CellSize / 2.0f);
+                    _CreateRoof(point);
                 }
             });
         }
