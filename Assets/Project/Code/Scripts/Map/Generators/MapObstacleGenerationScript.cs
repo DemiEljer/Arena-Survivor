@@ -1,4 +1,5 @@
-﻿using MapGenearionLibrary.Base;
+﻿using Assets.Project.Code.Scripts.Map.Fabrics;
+using MapGenearionLibrary.Base;
 using MapGenearionLibrary.Enums;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Project.Code.Scripts.Map
+namespace Assets.Project.Code.Scripts.Map.Generators
 {
     public class MapObstacleGenerationScript : AMapObjectGenerationScript
     {

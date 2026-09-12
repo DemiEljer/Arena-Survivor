@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Project.Code.Scripts.Map
+namespace Assets.Project.Code.Scripts.Map.Fabrics
 {
     public class AMapObjectFabricScript : MonoBehaviour
     {

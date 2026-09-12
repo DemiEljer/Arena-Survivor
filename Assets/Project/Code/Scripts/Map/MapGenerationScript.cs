@@ -5,88 +5,92 @@ using Unity.VisualScripting;
 using Assets.Project.Code.Scripts.Map;
 using System.Collections.Generic;
 using MapGenearionLibrary.Navigation;
+using Assets.Project.Code.Scripts.Map.Generators;
 
-public class MapGenerationScript : MonoBehaviour
+namespace Assets.Project.Code.Scripts.Map
 {
-    private static MapFabric _MapFabric { get; set; }
-
-    public int GenerationSeed = 1;
-    public MapParamsScript Params { get; private set; }
-    public Map Map { get; private set; }
-    public MapNavigationHandler MapNavigation { get; private set; }
-    public MapObjectLocationHandler ObjectLocations { get; private set; }
-    public event Action<MapGenerationScript> MapHasBeenGeneratedEvent;
-
-    private MapGenerationConfig _Config { get; } = new();
-    private List<AMapObjectGenerationScript> _ObjectGenerators { get; } = new();
-    private bool _MapHasBeenGenerated { get; set; } = false;
-    private Transform _MapOwnerTransform { get; set; }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public class MapGenerationScript : MonoBehaviour
     {
-        if (_MapFabric is null)
+        private static MapFabric _MapFabric { get; set; }
+
+        public int GenerationSeed = 1;
+        public MapParamsScript Params { get; private set; }
+        public MapGenearionLibrary.Map Map { get; private set; }
+        public MapNavigationHandler MapNavigation { get; private set; }
+        public MapObjectLocationHandler ObjectLocations { get; private set; }
+        public event Action<MapGenerationScript> MapHasBeenGeneratedEvent;
+
+        private MapGenerationConfig _Config { get; } = new();
+        private List<AMapObjectGenerationScript> _ObjectGenerators { get; } = new();
+        private bool _MapHasBeenGenerated { get; set; } = false;
+        private Transform _MapOwnerTransform { get; set; }
+
+        // Start is called once before the first execution of Update after the MonoBehaviour is created
+        void Start()
         {
-            _MapFabric = new MapFabric(GenerationSeed);
+            if (_MapFabric is null)
+            {
+                _MapFabric = new MapFabric(GenerationSeed);
+            }
+
+            _MapOwnerTransform = this.GetComponent<Transform>();
+            Params = this.GetComponent<MapParamsScript>();
+
+            if (Params is not null)
+            {
+                _Config.Width = Params.Width;
+                _Config.Height = Params.Height;
+                _Config.MaxLayerCount = Params.MaxLayerCount;
+                _Config.MinRoomWidth = Params.MinRoomWidth;
+                _Config.MinRoomHeight = Params.MinRoomHeight;
+                _Config.MaxDoorsCount = Params.MaxDoorsCount;
+                _Config.IsRandomDoorsCount = Params.IsRandomDoorsCount;
+            }
+
+            Map = _MapFabric.GenerateMap(_Config);
+            _MapFabric.SetMapBorderWalls(Map);
+            MapNavigation = new MapNavigationHandler(Map);
+            ObjectLocations = new MapObjectLocationHandler(this);
         }
 
-        _MapOwnerTransform = this.GetComponent<Transform>();
-        Params = this.GetComponent<MapParamsScript>();
-        
-        if (Params is not null)
+        // Update is called once per frame
+        void Update()
         {
-            _Config.Width = Params.Width;
-            _Config.Height = Params.Height;
-            _Config.MaxLayerCount = Params.MaxLayerCount;
-            _Config.MinRoomWidth = Params.MinRoomWidth;
-            _Config.MinRoomHeight = Params.MinRoomHeight;
-            _Config.MaxDoorsCount = Params.MaxDoorsCount;
-            _Config.IsRandomDoorsCount = Params.IsRandomDoorsCount;
+            if (!_MapHasBeenGenerated)
+            {
+                _CreateMapObjects();
+
+                Debug.Log("Карта была сгенерирована");
+
+                MapHasBeenGeneratedEvent?.Invoke(this);
+
+                _MapHasBeenGenerated = true;
+            }
         }
 
-        Map = _MapFabric.GenerateMap(_Config);
-        _MapFabric.SetMapBorderWalls(Map);
-        MapNavigation = new MapNavigationHandler(Map);
-        ObjectLocations = new MapObjectLocationHandler(this);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (!_MapHasBeenGenerated)
+        public void AppendGenerator(AMapObjectGenerationScript generator)
         {
-            _CreateMapObjects();
-
-            Debug.Log("Карта была сгенерирована");
-
-            MapHasBeenGeneratedEvent?.Invoke(this);
-
-            _MapHasBeenGenerated = true;
+            _ObjectGenerators.Add(generator);
         }
-    }
 
-    public void AppendGenerator(AMapObjectGenerationScript generator)
-    {
-        _ObjectGenerators.Add(generator);
-    }
-
-    private void _CreateMapObjects()
-    {
-        foreach (var generator in _ObjectGenerators)
+        private void _CreateMapObjects()
         {
-            generator.Generate(this);
+            foreach (var generator in _ObjectGenerators)
+            {
+                generator.Generate(this);
+            }
         }
-    }
 
-    public Vector3 GetSpawnPoint() => new Vector3((float)Map.Width * Params.CellSize / 2.0f, Params.WallHeight / 2.0f, (float)Map.Width * Params.CellSize / 2.0f);
+        public Vector3 GetSpawnPoint() => new Vector3((float)Map.Width * Params.CellSize / 2.0f, Params.WallHeight / 2.0f, (float)Map.Width * Params.CellSize / 2.0f);
 
-    public void AppendObjectAsChild(GameObject childObject)
-    {
-        var childObjectTransform = childObject?.GetComponent<Transform>();
-
-        if (childObjectTransform is not null)
+        public void AppendObjectAsChild(GameObject childObject)
         {
-            childObjectTransform.parent = _MapOwnerTransform;
+            var childObjectTransform = childObject?.GetComponent<Transform>();
+
+            if (childObjectTransform is not null)
+            {
+                childObjectTransform.parent = _MapOwnerTransform;
+            }
         }
     }
 }

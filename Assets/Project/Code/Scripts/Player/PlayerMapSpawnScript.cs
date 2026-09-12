@@ -1,3 +1,4 @@
+using Assets.Project.Code.Scripts.Map;
 using UnityEngine;
 
 public class PlayerMapSpawnScript : MonoBehaviour

@@ -638,8 +638,10 @@ GameObject:
   - component: {fileID: 1849053988}
   - component: {fileID: 1849053990}
   - component: {fileID: 1849053992}
-  - component: {fileID: 1849053991}
-  - component: {fileID: 1849053989}
+  - component: {fileID: 1849053996}
+  - component: {fileID: 1849053995}
+  - component: {fileID: 1849053994}
+  - component: {fileID: 1849053993}
   m_Layer: 0
   m_Name: MapOwner
   m_TagString: Untagged
@@ -662,26 +664,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1849053989
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1849053987}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 38e843b0746883b4a85f28906854be82, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MapObjectFabricScript
-  WallsPrefabs:
-  - {fileID: 4031939471867580332, guid: d117b7d9bbe07764d82bf6d82034bdc3, type: 3}
-  PillarsPrefabs:
-  - {fileID: 8323861031108241930, guid: 4f92dd97b9103844aac4e3bb74646cc0, type: 3}
-  FloorPrefabs:
-  - {fileID: 8323861031108241930, guid: 4f92dd97b9103844aac4e3bb74646cc0, type: 3}
-  RoofPrefabs:
-  - {fileID: 2664566333867786937, guid: e62b6e9b3cd78154d943b330c671d3f3, type: 3}
 --- !u!114 &1849053990
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -695,21 +677,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapGenerationScript
   GenerationSeed: 2
---- !u!114 &1849053991
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1849053987}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee6411147b499d447b373cc600fe5dc8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.MapObstacleGenerationScript
-  DoesGenerateWalls: 1
-  DoesGenerateFloor: 1
-  DoesGenerateRoof: 0
 --- !u!114 &1849053992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -722,18 +689,79 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6db5c62c63a953f4abbfb87b575f4828, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.MapParamsScript
-  Width: 10
-  Height: 10
+  Width: 15
+  Height: 15
   MaxLayerCount: -1
-  MinRoomWidth: -1
-  MinRoomHeight: -1
+  MinRoomWidth: 2
+  MinRoomHeight: 2
   MaxDoorsCount: -1
   IsRandomDoorsCount: 1
   CellSize: 1
   WallWidth: 0.1
-  WallHeight: 1.5
+  WallHeight: 1.2
   FloorHeight: 0.1
   RoofHeight: 0.1
+--- !u!114 &1849053993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849053987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a48e19329ceeea749ba8fb04f80e70c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Fabrics.MapObstacleObjectFabricScript
+  WallsPrefabs:
+  - {fileID: 4031939471867580332, guid: d117b7d9bbe07764d82bf6d82034bdc3, type: 3}
+  PillarsPrefabs:
+  - {fileID: 5220268078485224483, guid: 467fcb7ba23f1c54bb824797170ed3ec, type: 3}
+  FloorPrefabs:
+  - {fileID: 8323861031108241930, guid: 4f92dd97b9103844aac4e3bb74646cc0, type: 3}
+  RoofPrefabs:
+  - {fileID: 2664566333867786937, guid: e62b6e9b3cd78154d943b330c671d3f3, type: 3}
+--- !u!114 &1849053994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849053987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98e609ee1436c3740b22cb14eea8596d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Fabrics.MapLightObjectFabricScript
+  LightPointPrefab: {fileID: 7081736130214465388, guid: a54e745d65cc2914d9cebec116f17a10, type: 3}
+--- !u!114 &1849053995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849053987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eefd005c8fcecf84a9647dc15bb1e826, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Generators.MapObstacleGenerationScript
+  DoesGenerateWalls: 1
+  DoesGenerateFloor: 1
+  DoesGenerateRoof: 1
+--- !u!114 &1849053996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849053987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8fb344e9fb50e447a3a5a19d87b1838, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Generators.MapLightObjectGenerationScript
+  DoesGenerateLightPoints: 0
 --- !u!1 &2100184265
 GameObject:
   m_ObjectHideFlags: 0

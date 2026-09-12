@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Project.Code.Scripts.Map
+namespace Assets.Project.Code.Scripts.Map.Generators
 {
     public abstract class AMapObjectGenerationScript : MonoBehaviour
     {
