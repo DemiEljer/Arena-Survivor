@@ -13,6 +13,7 @@ namespace Assets.Project.Code.Scripts.Map
     public class MapGenerationScript : MonoBehaviour
     {
         private static MapFabric _MapFabric { get; set; }
+        public static System.Random Rnd => _MapFabric.Rnd;
 
         public int GenerationSeed = 1;
         public MapParamsScript Params { get; private set; }

@@ -21,8 +21,6 @@ namespace Assets.Project.Code.Scripts.Map.Generators
 
         private MapLightObjectFabricScript _ObjectsFabric { get; set; }
 
-        private System.Random _Rnd { get; } = new System.Random();
-
         private MapCellDensityCalculation _PointLightDensity { get; set; }
 
         protected override void _Start()
