@@ -73,14 +73,14 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                     _HandleTorchCreatingLogic(new MapPoint(room.StartX + i, room.StartY), MapObjectOrientationEnum.Top);
                 }
 
-                for (int i = 1; i < room.Height; i++)
+                for (int i = 0; i < room.Height; i++)
                 {
                     _HandleTorchCreatingLogic(new MapPoint(room.StartX + room.Width - 1, room.StartY + i), MapObjectOrientationEnum.Right);
                 }
 
                 if (room.Height > 1)
                 {
-                    for (int i = 1; i < room.Width; i++)
+                    for (int i = 0; i < room.Width; i++)
                     {
                         _HandleTorchCreatingLogic(new MapPoint(room.StartX + room.Width - 1 - i, room.StartY + room.Height - 1), MapObjectOrientationEnum.Bottom);
                     }
@@ -88,7 +88,7 @@ namespace Assets.Project.Code.Scripts.Map.Generators
 
                 if (room.Width > 1)
                 {
-                    for (int i = 1; i < room.Height - 1; i++)
+                    for (int i = 0; i < room.Height - 1; i++)
                     {
                         _HandleTorchCreatingLogic(new MapPoint(room.StartX, room.StartY + room.Height - 1 - i), MapObjectOrientationEnum.Left);
                     }

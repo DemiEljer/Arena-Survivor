@@ -12,11 +12,13 @@ namespace Assets.Project.Code.Scripts.Map.Fabrics
         public GameObject[] PillarsPrefabs = Array.Empty<GameObject>();
         public GameObject[] FloorPrefabs = Array.Empty<GameObject>();
         public GameObject[] RoofPrefabs = Array.Empty<GameObject>();
+        public GameObject[] DoorPrefabs = Array.Empty<GameObject>();
 
         private CollectionIndexCyclicalIterator _WallIterator { get; } = new();
         private CollectionIndexCyclicalIterator _PillarIterator { get; } = new();
         private CollectionIndexCyclicalIterator _FloorIterator { get; } = new();
         private CollectionIndexCyclicalIterator _RoofIterator { get; } = new();
+        private CollectionIndexCyclicalIterator _DoorIterator { get; } = new();
 
         public GameObject CreateWall(Vector3 location, Quaternion quaternion, Vector3 scale) => _CreateInstance(WallsPrefabs, _WallIterator, location, quaternion, scale);
 
@@ -25,5 +27,7 @@ namespace Assets.Project.Code.Scripts.Map.Fabrics
         public GameObject CreateFloor(Vector3 location, Quaternion quaternion, Vector3 scale) => _CreateInstance(FloorPrefabs, _FloorIterator, location, quaternion, scale);
 
         public GameObject CreateRoof(Vector3 location, Quaternion quaternion, Vector3 scale) => _CreateInstance(RoofPrefabs, _RoofIterator, location, quaternion, scale);
+
+        public GameObject CreateDoor(Vector3 location, Quaternion quaternion, Vector3 scale) => _CreateInstance(DoorPrefabs, _DoorIterator, location, quaternion, scale);
     }
 }

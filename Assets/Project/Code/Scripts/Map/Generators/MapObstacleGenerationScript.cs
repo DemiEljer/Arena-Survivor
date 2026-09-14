@@ -14,10 +14,9 @@ namespace Assets.Project.Code.Scripts.Map.Generators
     public class MapObstacleGenerationScript : AMapObjectGenerationScript
     {
         public bool DoesGenerateWalls = false;
-
         public bool DoesGenerateFloor = false;
-
         public bool DoesGenerateRoof = false;
+        public bool DoesGenerateDoors = false;
 
         private MapObstacleObjectFabricScript _ObjectsFabric { get; set; }
 
@@ -101,14 +100,34 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                 mapGenerationScript.AppendObjectAsChild(newRoof);
             }
 
+            void _CreateDoor(MapPoint point, MapObjectOrientationEnum doorOrientation)
+            {
+                Vector3 doorLocation = mapGenerationScript.ObjectLocations.GetWallLocation(point, doorOrientation);
+                Quaternion doorQuanterion = mapGenerationScript.ObjectLocations.GetObjectRotation(doorOrientation);
+                var doorScale = new Vector3(mapGenerationScript.Params.WallWidth, actualWallHeight, actualWallLength);
+
+                var newWall = _ObjectsFabric.CreateDoor(doorLocation, doorQuanterion, doorScale);
+
+                if (newWall is not null)
+                {
+                    newWall.name = $"Door";
+                }
+
+                mapGenerationScript.AppendObjectAsChild(newWall);
+            }
+
             map.Foreach((point, cell) =>
             {
                 if (DoesGenerateWalls)
                 {
-                    if (cell.BottomWall && point.Y == (map.Height - 1))
+                    if (point.Y == (map.Height - 1))
                     {
-                        _CreateWall(point, MapObjectOrientationEnum.Bottom);
+                        if (cell.BottomWall)
+                        {
+                            _CreateWall(point, MapObjectOrientationEnum.Bottom);
+                        }
                     }
+
                     if (cell.TopWall)
                     {
                         _CreateWall(point, MapObjectOrientationEnum.Top);
@@ -117,9 +136,12 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                     {
                         _CreateWall(point, MapObjectOrientationEnum.Left);
                     }
-                    if (cell.RightWall && point.X == (map.Width - 1))
+                    if (point.X == (map.Width - 1))
                     {
-                        _CreateWall(point, MapObjectOrientationEnum.Right);
+                        if (cell.RightWall)
+                        {
+                            _CreateWall(point, MapObjectOrientationEnum.Right);
+                        }
                     }
 
                     var prevDiagCell = map.GetCell(point.X - 1, point.Y - 1);
@@ -150,6 +172,43 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                     _CreateRoof(point);
                 }
             });
+
+            if (DoesGenerateDoors)
+            {
+                foreach (var door in mapGenerationScript.MapNavigation.Doors)
+                {
+                    _CreateDoor(door.Area1, (MapObjectOrientationEnum)door.Orientation);
+
+                    if (door.Orientation == CellWallOrientationEnum.Left)
+                    {
+                        var prevCell = map.GetCell(door.Area1.X, door.Area1.Y - 1);
+                        var nextCell = map.GetCell(door.Area1.X, door.Area1.Y + 1);
+
+                        if (!prevCell.GetWall(CellWallOrientationEnum.Left))
+                        {
+                            _CreateWallPillar(door.Area1, MapObjectOrientationEnum.TopLeft);
+                        }
+                        if (!prevCell.GetWall(CellWallOrientationEnum.Left))
+                        {
+                            _CreateWallPillar(door.Area1, MapObjectOrientationEnum.BottomLeft);
+                        }
+                    }
+                    else if (door.Orientation == CellWallOrientationEnum.Top)
+                    {
+                        var prevCell = map.GetCell(door.Area1.X - 1, door.Area1.Y);
+                        var nextCell = map.GetCell(door.Area1.X + 1, door.Area1.Y);
+
+                        if (!prevCell.GetWall(CellWallOrientationEnum.Top))
+                        {
+                            _CreateWallPillar(door.Area1, MapObjectOrientationEnum.TopRight);
+                        }
+                        if (!prevCell.GetWall(CellWallOrientationEnum.Top))
+                        {
+                            _CreateWallPillar(door.Area1, MapObjectOrientationEnum.TopLeft);
+                        }
+                    }
+                }
+            }
         }
     }
 }

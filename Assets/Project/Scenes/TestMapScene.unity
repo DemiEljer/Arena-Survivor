@@ -721,6 +721,8 @@ MonoBehaviour:
   - {fileID: 8323861031108241930, guid: 4f92dd97b9103844aac4e3bb74646cc0, type: 3}
   RoofPrefabs:
   - {fileID: 2664566333867786937, guid: e62b6e9b3cd78154d943b330c671d3f3, type: 3}
+  DoorPrefabs:
+  - {fileID: 180090331305960851, guid: 0f2735f3be6450f4e82baf2a60a2e944, type: 3}
 --- !u!114 &1849053994
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -750,6 +752,7 @@ MonoBehaviour:
   DoesGenerateWalls: 1
   DoesGenerateFloor: 1
   DoesGenerateRoof: 1
+  DoesGenerateDoors: 1
 --- !u!114 &1849053996
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -765,7 +768,7 @@ MonoBehaviour:
   DoesGenerateLightPoints: 0
   DoesGenerateTorches: 1
   LightPointsDensity: 0.35
-  TorchPeriod: 10
+  TorchPeriod: 8
 --- !u!1 &2100184265
 GameObject:
   m_ObjectHideFlags: 0
