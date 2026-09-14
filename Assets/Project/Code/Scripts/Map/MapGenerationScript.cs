@@ -6,6 +6,7 @@ using Assets.Project.Code.Scripts.Map;
 using System.Collections.Generic;
 using MapGenearionLibrary.Navigation;
 using Assets.Project.Code.Scripts.Map.Generators;
+using MapGenearionLibrary.Base;
 
 namespace Assets.Project.Code.Scripts.Map
 {
@@ -81,7 +82,7 @@ namespace Assets.Project.Code.Scripts.Map
             }
         }
 
-        public Vector3 GetSpawnPoint() => new Vector3((float)Map.Width * Params.CellSize / 2.0f, Params.WallHeight / 2.0f, (float)Map.Width * Params.CellSize / 2.0f);
+        public Vector3 GetSpawnPoint() => ObjectLocations.GetCellCentralLocation(new MapPoint(Map.Width / 2, Map.Height / 2));
 
         public void AppendObjectAsChild(GameObject childObject)
         {

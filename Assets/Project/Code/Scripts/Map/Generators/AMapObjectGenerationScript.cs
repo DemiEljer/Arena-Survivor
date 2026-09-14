@@ -9,7 +9,7 @@ namespace Assets.Project.Code.Scripts.Map.Generators
 {
     public abstract class AMapObjectGenerationScript : MonoBehaviour
     {
-        private MapGenerationScript _MapGenerationScript { get; set; }
+        protected MapGenerationScript _MapGenerationScript { get; set; }
 
         private void Start()
         {

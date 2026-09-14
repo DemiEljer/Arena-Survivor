@@ -1,4 +1,5 @@
 ﻿using Assets.Project.Code.Scripts.Map.Fabrics;
+using Assets.Project.Code.Scripts.Map.Help;
 using MapGenearionLibrary.Base;
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,13 @@ namespace Assets.Project.Code.Scripts.Map.Generators
 
         private Random _Rnd { get; } = new Random();
 
+        private MapCellDensityCalculation _PointLightDensity { get; set; } 
+
         protected override void _Start()
         {
             _ObjectsFabric = GetComponent<MapLightObjectFabricScript>();
+
+            _PointLightDensity = new MapCellDensityCalculation(_MapGenerationScript.Map, 0.5f);
         }
 
         protected override void _Generate(MapGenerationScript mapGenerationScript)
@@ -28,7 +33,7 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                 return;
             }
 
-            void _CreateLightPoint(MapRoom room)
+            void _CreateLightPointInRoom(MapRoom room)
             {
                 MapPoint randomRoomPoint = new MapPoint(_Rnd.Next(room.StartX, room.StartX + room.Width), _Rnd.Next(room.StartY, room.StartY + room.Height));
 
@@ -38,11 +43,35 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                 mapGenerationScript.AppendObjectAsChild(newLightObject);
             }
 
+            void _CreateLightPoint(MapPoint lightLocation)
+            {
+                var newLightObject = _ObjectsFabric.CreateLightPoint(mapGenerationScript.ObjectLocations.GetCellCentralLocation(lightLocation));
+                newLightObject.name = "PointLight";
+
+                mapGenerationScript.AppendObjectAsChild(newLightObject);
+            }
+
             foreach (var room in mapGenerationScript.MapNavigation.Rooms)
             {
                 if (DoesGenerateLightPoints)
                 {
-                    _CreateLightPoint(room);
+                    //_CreateLightPointInRoom(room);
+                }
+            }
+
+            while (!_PointLightDensity.IsFullfilled)
+            {
+                var vaicantPoint = _PointLightDensity.GetMinValueCells().First();
+
+                if (vaicantPoint is not null)
+                {
+                    _PointLightDensity.Set(vaicantPoint);
+
+                    _CreateLightPoint(vaicantPoint);
+                }
+                else
+                {
+                    break;
                 }
             }
         }

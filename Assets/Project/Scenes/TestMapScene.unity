@@ -692,9 +692,9 @@ MonoBehaviour:
   Width: 15
   Height: 15
   MaxLayerCount: -1
-  MinRoomWidth: 2
-  MinRoomHeight: 2
-  MaxDoorsCount: -1
+  MinRoomWidth: 3
+  MinRoomHeight: 3
+  MaxDoorsCount: 4
   IsRandomDoorsCount: 1
   CellSize: 1
   WallWidth: 0.1
