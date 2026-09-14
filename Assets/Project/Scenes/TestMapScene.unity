@@ -765,7 +765,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8fb344e9fb50e447a3a5a19d87b1838, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Generators.MapLightObjectGenerationScript
-  DoesGenerateLightPoints: 0
+  DoesGenerateLightPoints: 1
   DoesGenerateTorches: 1
   LightPointsDensity: 0.35
   TorchPeriod: 8
