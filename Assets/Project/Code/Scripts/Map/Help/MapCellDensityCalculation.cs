@@ -74,7 +74,7 @@ namespace Assets.Project.Code.Scripts.Map.Help
                 x = x < 0 ? x + Width : x;
                 y = y < 0 ? y + Height : y;
 
-                if (value >= 1.0)
+                if (value >= 1.0 && Cells[y * Width + x].GetValue() < 1.0f)
                 {
                     ActiveCellsCount++;
                 }
