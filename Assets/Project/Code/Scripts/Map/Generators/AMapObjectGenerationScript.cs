@@ -27,7 +27,14 @@ namespace Assets.Project.Code.Scripts.Map.Generators
         {
             if (mapGenerationScript is not null && mapGenerationScript.Params is not null)
             {
-                _Generate(mapGenerationScript);
+                try
+                {
+                    _Generate(mapGenerationScript);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
             }
         }
 

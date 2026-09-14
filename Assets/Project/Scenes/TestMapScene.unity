@@ -734,6 +734,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Fabrics.MapLightObjectFabricScript
   LightPointPrefab: {fileID: 7081736130214465388, guid: a54e745d65cc2914d9cebec116f17a10, type: 3}
+  TorchPrefab: {fileID: 7320240724547625862, guid: 1ec9da513e7a7524c80a84f85c2ad5e1, type: 3}
 --- !u!114 &1849053995
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -762,6 +763,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Generators.MapLightObjectGenerationScript
   DoesGenerateLightPoints: 0
+  DoesGenerateTorches: 1
+  LightPointsDensity: 0.35
+  TorchPeriod: 10
 --- !u!1 &2100184265
 GameObject:
   m_ObjectHideFlags: 0
