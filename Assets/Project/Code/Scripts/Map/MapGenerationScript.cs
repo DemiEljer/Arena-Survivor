@@ -31,7 +31,14 @@ namespace Assets.Project.Code.Scripts.Map
         {
             if (_MapFabric is null)
             {
-                _MapFabric = new MapFabric(GenerationSeed);
+                if (GenerationSeed > 0)
+                {
+                    _MapFabric = new MapFabric(GenerationSeed);
+                }
+                else
+                {
+                    _MapFabric = new MapFabric();
+                }
             }
 
             _MapOwnerTransform = this.GetComponent<Transform>();
