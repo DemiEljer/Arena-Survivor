@@ -13,6 +13,7 @@ namespace Assets.Project.Code.Scripts.Agents
     {
         public GameObject MapOwner;
         public MapGenerationScript MapHandlerScript { get; private set; }
+        public AgentParamsScript Params { get; private set; }
 
         private List<AAgentGeneratorScript> _AgentGenerators { get; } = new List<AAgentGeneratorScript>();
         private Dictionary<AgentBaseScript, GameObject> _Agents { get; } = new Dictionary<AgentBaseScript, GameObject>();
@@ -28,6 +29,8 @@ namespace Assets.Project.Code.Scripts.Agents
                     MapHandlerScript.MapHasBeenGeneratedEvent += MapHasBeenGeneratedEventHandler;
                 }
             }
+
+            Params = this.GetComponent<AgentParamsScript>();
         }
 
         private void Update()

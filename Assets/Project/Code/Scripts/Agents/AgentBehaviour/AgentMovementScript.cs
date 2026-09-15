@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
 {
@@ -33,6 +34,10 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
         protected override void _Update()
         {
             _Navigation.SetCurrentLocation(_AgentTransformComponent.localPosition);
+            if (BaseScript.AgentManagerScript.Params is not null)
+            {
+                _Navigation.PathCollisionDetectionDistance = BaseScript.AgentManagerScript.Params.PathCollisionDetectionDistance;
+            }
 
             switch (MovementState)
             {
@@ -61,13 +66,23 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
             }
             else
             {
-                Vector3 movement = (_Navigation.CurrentTargetLocation - _AgentTransformComponent.localPosition);
-                movement.y = 0;
-                movement.Normalize();
-                movement *= Speed * Time.deltaTime;
-                Vector3.ClampMagnitude(movement, Speed);
+                Vector3 direction = (_Navigation.CurrentTargetLocation - _AgentTransformComponent.localPosition);
+                direction.y = 0;
+                direction.Normalize();
+
+                _AgentTransformComponent.localRotation = Quaternion.LookRotation(direction);
+
+                Vector3 movement = (new Vector3(0, 0, 1.0f)) * Speed * Time.deltaTime;
+                //Vector3.ClampMagnitude(movement, Speed);
 
                 _AgentTransformComponent.Translate(movement);
+
+                RaycastHit raycastHit;
+
+                if (Physics.Raycast(_AgentTransformComponent.position, direction, out raycastHit, 10.0f))
+                {
+                    _Navigation.DistanceToObstacle = raycastHit.distance;
+                }
 
                 _Navigation.InvokeNavigation();
 

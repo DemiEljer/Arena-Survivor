@@ -186,5 +186,22 @@ namespace Assets.Project.Code.Scripts.Map
             _MapGenerationScript.Params.WallHeight - _MapGenerationScript.Params.RoofHeight / 2.0f
             ,
             (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f);
+
+        public Vector3 AmplitudeCellLocationModification(Vector3 location) => new Vector3
+        (
+            location.x + (float)MapGenerationScript.Rnd.NextDouble() * _MapGenerationScript.Params.CellSize - _MapGenerationScript.Params.CellSize / 2.0f
+            ,
+            location.y
+            ,
+            location.z + (float)MapGenerationScript.Rnd.NextDouble() * _MapGenerationScript.Params.CellSize - _MapGenerationScript.Params.CellSize / 2.0f
+        );
+
+        public static bool CompareTwoLocations(Vector3 location1, Vector3 location2, float approximation)
+        {
+            location1.y = 0;
+            location2.y = 0;
+
+            return Vector3.Distance(location1, location2) < approximation;
+        }
     }
 }

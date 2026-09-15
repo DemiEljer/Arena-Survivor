@@ -525,6 +525,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1705757697}
   - component: {fileID: 1705757696}
+  - component: {fileID: 1705757700}
   - component: {fileID: 1705757699}
   - component: {fileID: 1705757698}
   m_Layer: 0
@@ -588,7 +589,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.Generators.AgentEnemyGeneratorScript
   DoesGenerateEnemies: 1
-  EnemyCount: 5
+  EnemyCount: 10
+--- !u!114 &1705757700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1705757695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da377a6724f71c448b8992dd2d7ed623, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.AgentParamsScript
+  PathCollisionDetectionDistance: 0.2
 --- !u!1 &1706359427
 GameObject:
   m_ObjectHideFlags: 0
@@ -766,8 +780,8 @@ MonoBehaviour:
   Width: 15
   Height: 15
   MaxLayerCount: -1
-  MinRoomWidth: 3
-  MinRoomHeight: 3
+  MinRoomWidth: 2
+  MinRoomHeight: 2
   MaxDoorsCount: 4
   IsRandomDoorsCount: 1
   CellSize: 1
