@@ -80,6 +80,8 @@ namespace Assets.Project.Code.Scripts.Map
         public void AppendGenerator(AMapObjectGenerationScript generator)
         {
             _ObjectGenerators.Add(generator);
+
+            generator.ObjectHasBeenGeneratedEvent += AppendObjectAsChild;
         }
 
         private void _CreateMapObjects()

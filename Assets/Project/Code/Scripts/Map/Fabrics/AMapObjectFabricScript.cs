@@ -10,6 +10,8 @@ namespace Assets.Project.Code.Scripts.Map.Fabrics
 {
     public class AMapObjectFabricScript : MonoBehaviour
     {
+        public event Action<GameObject> ObjectHasBeenCreatedEvent;
+
         protected GameObject _CreateInstance(GameObject[] prefabsCollection, CollectionIndexCyclicalIterator iterator, Vector3 location, Quaternion quaternion, Vector3 scale)
         {
             if (prefabsCollection is not null && iterator is not null)
@@ -36,6 +38,8 @@ namespace Assets.Project.Code.Scripts.Map.Fabrics
                     newGameObjectTransformComponent.localRotation = quaternion;
                     newGameObjectTransformComponent.localPosition = location;
                 }
+
+                ObjectHasBeenCreatedEvent?.Invoke(newGameObject);
 
                 return newGameObject;
             }
@@ -70,6 +74,8 @@ namespace Assets.Project.Code.Scripts.Map.Fabrics
                     newGameObjectTransformComponent.localRotation = quaternion;
                     newGameObjectTransformComponent.localPosition = location;
                 }
+
+                ObjectHasBeenCreatedEvent?.Invoke(newGameObject);
 
                 return newGameObject;
             }

@@ -23,6 +23,8 @@ namespace Assets.Project.Code.Scripts.Map.Generators
         protected override void _Start()
         {
             _ObjectsFabric = GetComponent<MapObstacleObjectFabricScript>();
+
+            _RegistrateFabric(_ObjectsFabric);
         }
 
         protected override void _Generate(MapGenerationScript mapGenerationScript)
@@ -48,8 +50,6 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                 {
                     newWall.name = $"Wall";
                 }
-
-                mapGenerationScript.AppendObjectAsChild(newWall);
             }
 
             void _CreateWallPillar(MapPoint point, MapObjectOrientationEnum pillarOrientation)
@@ -64,8 +64,6 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                 {
                     newPillar.name = $"WallPillar";
                 }
-
-                mapGenerationScript.AppendObjectAsChild(newPillar);
             }
 
             void _CreateFloor(MapPoint point)
@@ -80,8 +78,6 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                 {
                     newFloor.name = $"Floor";
                 }
-
-                mapGenerationScript.AppendObjectAsChild(newFloor);
             }
 
             void _CreateRoof(MapPoint point)
@@ -96,8 +92,6 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                 {
                     newRoof.name = $"Roof";
                 }
-
-                mapGenerationScript.AppendObjectAsChild(newRoof);
             }
 
             void _CreateDoor(MapPoint point, MapObjectOrientationEnum doorOrientation)
@@ -112,8 +106,6 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                 {
                     newWall.name = $"Door";
                 }
-
-                mapGenerationScript.AppendObjectAsChild(newWall);
             }
 
             map.Foreach((point, cell) =>

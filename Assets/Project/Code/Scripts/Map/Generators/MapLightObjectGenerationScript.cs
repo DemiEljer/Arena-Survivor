@@ -27,6 +27,8 @@ namespace Assets.Project.Code.Scripts.Map.Generators
         {
             _ObjectsFabric = GetComponent<MapLightObjectFabricScript>();
 
+            _RegistrateFabric(_ObjectsFabric);
+
             _PointLightDensity = new MapCellDensityCalculation(_MapGenerationScript.Map, LightPointsDensity);
         }
 
@@ -41,8 +43,6 @@ namespace Assets.Project.Code.Scripts.Map.Generators
             {
                 var newLightObject = _ObjectsFabric.CreateLightPoint(mapGenerationScript.ObjectLocations.GetCellCentralLocation(lightLocation));
                 newLightObject.name = "PointLight";
-
-                mapGenerationScript.AppendObjectAsChild(newLightObject);
             }
 
             void _CreateTorchesInRoom(MapRoom room)
@@ -102,8 +102,6 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                     mapGenerationScript.ObjectLocations.GetObjectRotation(orientation)
                 );
                 newTorchObject.name = "Torch";
-
-                mapGenerationScript.AppendObjectAsChild(newTorchObject);
             }
 
             if (DoesGenerateLightPoints)

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Assets.Project.Code.Scripts.Agents;
+using Assets.Project.Code.Scripts.Agents.Fabrics;
+using Assets.Project.Code.Scripts.Map.Fabrics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +13,8 @@ namespace Assets.Project.Code.Scripts.Map.Generators
     public abstract class AMapObjectGenerationScript : MonoBehaviour
     {
         protected MapGenerationScript _MapGenerationScript { get; set; }
+
+        public event Action<GameObject> ObjectHasBeenGeneratedEvent;
 
         private void Start()
         {
@@ -41,5 +46,18 @@ namespace Assets.Project.Code.Scripts.Map.Generators
         protected abstract void _Generate(MapGenerationScript mapGenerationScript);
 
         protected abstract void _Start();
+
+        protected void _RegistrateFabric(AMapObjectFabricScript fabric)
+        {
+            if (fabric is not null)
+            {
+                fabric.ObjectHasBeenCreatedEvent += (gameObject) => _InvokeAgentGenerationEvent(gameObject);
+            }
+        }
+
+        protected void _InvokeAgentGenerationEvent(GameObject gameObject)
+        {
+            ObjectHasBeenGeneratedEvent?.Invoke(gameObject);
+        }
     }
 }
