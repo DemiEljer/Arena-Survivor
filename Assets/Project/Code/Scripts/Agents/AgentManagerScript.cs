@@ -12,7 +12,7 @@ namespace Assets.Project.Code.Scripts.Agents
     public class AgentManagerScript : MonoBehaviour
     {
         public GameObject MapOwner;
-        public MapGenerationScript MapHandlerScript { get; set; }
+        public MapGenerationScript MapHandlerScript { get; private set; }
 
         private List<AAgentGeneratorScript> _AgentGenerators { get; } = new List<AAgentGeneratorScript>();
         private Dictionary<AgentBaseScript, GameObject> _Agents { get; } = new Dictionary<AgentBaseScript, GameObject>();
@@ -21,11 +21,11 @@ namespace Assets.Project.Code.Scripts.Agents
         {
             if (MapOwner is not null)
             {
-                var _MapHandlerScript = MapOwner.GetComponent<MapGenerationScript>();
+                MapHandlerScript = MapOwner.GetComponent<MapGenerationScript>();
 
-                if (_MapHandlerScript is not null)
+                if (MapHandlerScript is not null)
                 {
-                    _MapHandlerScript.MapHasBeenGeneratedEvent += MapHasBeenGeneratedEventHandler;
+                    MapHandlerScript.MapHasBeenGeneratedEvent += MapHasBeenGeneratedEventHandler;
                 }
             }
         }

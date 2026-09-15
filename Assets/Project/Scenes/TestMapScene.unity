@@ -515,6 +515,80 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!1 &1705757695
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1705757697}
+  - component: {fileID: 1705757696}
+  - component: {fileID: 1705757699}
+  - component: {fileID: 1705757698}
+  m_Layer: 0
+  m_Name: AgentsOwner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1705757696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1705757695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e406e88a5c4c3e949a69e1d8b07a6a01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.AgentsManager
+  MapOwner: {fileID: 1849053987}
+--- !u!4 &1705757697
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1705757695}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1705757698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1705757695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 801c80a2300063643bd3f15dba2180d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.Fabrics.AgentEnemyFabricScript
+  DefaultEnemyPrefab: {fileID: 4082780562568406212, guid: 0559ab42a5baad64b9608a253be79810, type: 3}
+--- !u!114 &1705757699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1705757695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a7f14124159e804ca7cff75c5ac1876, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.Generators.AgentEnemyGeneratorScript
+  DoesGenerateEnemies: 1
+  EnemyCount: 5
 --- !u!1 &1706359427
 GameObject:
   m_ObjectHideFlags: 0
@@ -751,7 +825,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Generators.MapObstacleGenerationScript
   DoesGenerateWalls: 1
   DoesGenerateFloor: 1
-  DoesGenerateRoof: 1
+  DoesGenerateRoof: 0
   DoesGenerateDoors: 1
 --- !u!114 &1849053996
 MonoBehaviour:
@@ -765,7 +839,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8fb344e9fb50e447a3a5a19d87b1838, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Generators.MapLightObjectGenerationScript
-  DoesGenerateLightPoints: 1
+  DoesGenerateLightPoints: 0
   DoesGenerateTorches: 1
   LightPointsDensity: 0.35
   TorchPeriod: 8
@@ -902,4 +976,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 2100184267}
   - {fileID: 1849053988}
+  - {fileID: 1705757697}
   - {fileID: 1258016254}
