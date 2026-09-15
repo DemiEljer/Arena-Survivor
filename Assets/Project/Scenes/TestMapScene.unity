@@ -574,7 +574,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 801c80a2300063643bd3f15dba2180d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.Fabrics.AgentEnemyFabricScript
-  DefaultEnemyPrefab: {fileID: 4082780562568406212, guid: 0559ab42a5baad64b9608a253be79810, type: 3}
+  DefaultEnemyPrefab: {fileID: 4176891692188349743, guid: 7c81dd27ef26f054baf50964f14a792b, type: 3}
 --- !u!114 &1705757699
 MonoBehaviour:
   m_ObjectHideFlags: 0

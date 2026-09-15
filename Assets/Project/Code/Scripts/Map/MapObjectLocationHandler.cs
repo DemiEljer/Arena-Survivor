@@ -153,6 +153,12 @@ namespace Assets.Project.Code.Scripts.Map
             ,
             (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f);
 
+        public MapPoint GetCellMapPoint(Vector3 location) => new MapPoint(
+            (int)(location.x / _MapGenerationScript.Params.CellSize)
+            ,
+            (int)(location.z / _MapGenerationScript.Params.CellSize)
+            );
+
         public Vector3 GetFloorLocation(MapPoint point) => new Vector3(
             (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.CellSize / 2.0f
             ,

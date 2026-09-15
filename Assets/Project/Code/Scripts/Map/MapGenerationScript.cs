@@ -94,6 +94,8 @@ namespace Assets.Project.Code.Scripts.Map
 
         public Vector3 GetSpawnPoint() => ObjectLocations.GetCellCentralLocation(new MapPoint(Map.Width / 2, Map.Height / 2));
 
+        public MapPoint GetRandomMapPoint() => new MapPoint(Rnd.Next(0, Map.Width), Rnd.Next(0, Map.Height));
+
         public void AppendObjectAsChild(GameObject childObject)
         {
             var childObjectTransform = childObject?.GetComponent<Transform>();

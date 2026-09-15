@@ -6,8 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace 
-    Assets.Project.Code.Scripts.Map.Help
+namespace Assets.Project.Code.Scripts.Map.Help
 {
     public class MapCellDensityCalculation
     {

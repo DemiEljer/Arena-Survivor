@@ -58,6 +58,7 @@ namespace Assets.Project.Code.Scripts.Agents
             agentBaseScript.ObjectHasBeenDisposedEvent += AgentHasBeenDisposed;
 
             agentBaseScript.SetMapHandlerScript(MapHandlerScript);
+            agentBaseScript.SetAgentManagerScript(this);
 
             _Agents.Add(agentBaseScript, agentGameObject);
         }

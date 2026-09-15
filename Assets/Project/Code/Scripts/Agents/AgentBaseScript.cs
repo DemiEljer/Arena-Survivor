@@ -12,6 +12,7 @@ namespace Assets.Project.Code.Scripts.Agents
     public class AgentBaseScript : MonoBehaviour
     {
         public MapGenerationScript MapHandlerScript { get; private set; }
+        public AgentManagerScript MapManagerScript { get; private set; }
 
         public Action<AgentBaseScript> ObjectHasBeenDisposedEvent;
 
@@ -33,6 +34,11 @@ namespace Assets.Project.Code.Scripts.Agents
         public void SetMapHandlerScript(MapGenerationScript mapHandlerScript)
         {
             MapHandlerScript = mapHandlerScript;
+        }
+
+        public void SetAgentManagerScript(AgentManagerScript agentManagerScript)
+        {
+            MapManagerScript = agentManagerScript;
         }
 
         public void Dispose()
