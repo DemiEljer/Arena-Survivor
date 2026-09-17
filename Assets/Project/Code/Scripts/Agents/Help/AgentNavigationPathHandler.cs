@@ -16,6 +16,8 @@ namespace Assets.Project.Code.Scripts.Agents.Help
         public float PathCollisionDetectionDistance { get; set; } = 0.2f;
         public MapGenerationScript MapGenerationScript { get; }
 
+        private MapPoint _PreviouseMapPoint { get; set; } = new MapPoint(-1, -1);
+
         public float DistanceToObstacle { get; set; }
         public Vector3 CurrentLocation { get; private set; }
         public MapPoint CurrentMapPoint { get; private set; }
@@ -23,6 +25,9 @@ namespace Assets.Project.Code.Scripts.Agents.Help
         public MapPoint TargetMapPoint { get; private set; }
         public Vector3 CurrentTargetLocation { get; private set; }
         public MapPoint CurrentTargetMapPoint { get; private set; }
+
+        public bool IsCollisionDetected { get; private set; }
+        public bool IsNoPath => _PathHandler is null;
 
         private PathHandler _PathHandler { get; set; } = null;
 
@@ -35,6 +40,14 @@ namespace Assets.Project.Code.Scripts.Agents.Help
         {
             CurrentLocation = currentLocation;
             CurrentMapPoint = MapGenerationScript.ObjectLocations.GetCellMapPoint(CurrentLocation);
+
+            if (!_PreviouseMapPoint.AreEqual(CurrentMapPoint))
+            {
+                MapGenerationScript.MapNavigation.Obstacles[_PreviouseMapPoint] = false;
+                MapGenerationScript.MapNavigation.Obstacles[CurrentMapPoint] = true;
+
+                _PreviouseMapPoint = CurrentMapPoint;
+            }
         }
 
         public void SetTartgetMapPoint(MapPoint targetMapPoint)
@@ -55,12 +68,17 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
         public void InvokeNavigation()
         {
+            IsCollisionDetected = DistanceToObstacle < PathCollisionDetectionDistance;
+
+            bool isTargetMapPointAchived = false;
+
             if (_PathHandler is not null)
             {
-                var isTargetMapPointAchived = _PathHandler.Invoke(CurrentMapPoint, IsCurrentTargetLocationAchived(), DistanceToObstacle);
-                
-                _PathHandler.PathCollisionDetectionDistance = PathCollisionDetectionDistance;
+                isTargetMapPointAchived = _PathHandler.Invoke(CurrentMapPoint, IsCurrentTargetLocationAchived(), IsCollisionDetected);
+            }
 
+            if (_PathHandler is not null)
+            {
                 CurrentTargetMapPoint = _PathHandler.NextPoint;
 
                 if (isTargetMapPointAchived)
@@ -71,16 +89,13 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                 {
                     CurrentTargetLocation = MapGenerationScript.ObjectLocations.GetCellCentralLocation(CurrentTargetMapPoint);
                 }
-                // Небольшая модификация точки назначения в рамках выбранной клетки
-                if (_PathHandler.IsCollisionDeteced)
-                {
-                    CurrentTargetLocation = MapGenerationScript.ObjectLocations.AmplitudeCellLocationModification(CurrentTargetLocation);
-                }
             }
             else
             {
                 CurrentTargetMapPoint = CurrentMapPoint;
-                CurrentTargetLocation = CurrentLocation;
+                CurrentTargetLocation = MapGenerationScript.ObjectLocations.GetCellCentralLocation(CurrentMapPoint);
+                TargetMapPoint = CurrentTargetMapPoint;
+                TargetLocation = CurrentTargetLocation;
             }
         }
 
@@ -94,9 +109,11 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
             if (newPath is not null)
             {
-                _PathHandler = new PathHandler(newPath);
+                _PathHandler = new PathHandler(MapGenerationScript, newPath);
                 // Событие повторного построения пути
                 _PathHandler.NavigationPathHasBeenCorruptedEvent += _CreateNewPath;
+                // Событие полной блокировки пути
+                _PathHandler.NavigationPathHasBeenBlockedEvent += () => _PathHandler = null;
             }
             else
             {
@@ -106,127 +123,149 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
         public class PathHandler
         {
-            public MapNavigationGraphPath _Path { get; }
+            MapGenerationScript MapGenerationScript { get; }
+            public MapNavigationGraphPath Path { get; }
 
             public MapPoint NextPoint
             {
                 get
                 {
-                    if (_CurrentHelpPoint is null)
+                    if (_RandomRoomPoint is not null)
                     {
-                        return _Path.PointsSequence[_PathPointIndex];
+                        return _RandomRoomPoint;
+                    }
+                    else if (_CurrentHelpRoomPoints is null)
+                    {
+                        return Path.PointsSequence[_PathPointIndex].point;
                     }
                     else
                     {
-                        return _CurrentHelpPoint;
+                        return _CurrentHelpRoomPoints[_HelpRoomPathIndex];
                     }
                 }
             }
-            public MapRoom CurrentRoom => _Path.RoomsSequence[_PathRoomIndex];
-            public float PathCollisionDetectionDistance { get; set; }
-            public bool IsCollisionDeteced { get; private set; } = false;
+            public MapRoom CurrentRoom => _PathPointIndex > 0 ? Path.PointsSequence[_PathPointIndex - 1].room : NextRoom;
+            public MapRoom NextRoom => Path.PointsSequence[_PathPointIndex].room;
 
             public event Action NavigationPathHasBeenCorruptedEvent;
+            public event Action NavigationPathHasBeenBlockedEvent;
 
             private int _PathPointIndex = 0;
-            private int _PathRoomIndex = 0;
+            private int _HelpRoomPathIndex = 0;
 
-            private MapPoint _CurrentHelpPoint { get; set; } = null;
+            private MapPoint[] _CurrentHelpRoomPoints { get; set; } = null;
+            private MapPoint _RandomRoomPoint { get; set; } = null;
+            private MapPoint _PrevPoint { get; set; } = new MapPoint(-1, -1);
 
-            public PathHandler(MapNavigationGraphPath path)
+            public PathHandler(MapGenerationScript mapGenerationScript, MapNavigationGraphPath path)
             {
-                _Path = path;
+                MapGenerationScript = mapGenerationScript;
+                Path = path;
             }
 
-            public bool Invoke(MapPoint currentPoint, bool isCurrentTargetPointAchived, float distanceToObstacle)
+            public bool Invoke(MapPoint currentPoint, bool isCurrentTargetPointAchived, bool isCollisionDetected)
             {
-                IsCollisionDeteced = false;
-
-                if (!CurrentRoom.DoesRoomContainsPoint(currentPoint))
+                if (!CurrentRoom.DoesRoomContainsPoint(currentPoint) 
+                    && !NextRoom.DoesRoomContainsPoint(currentPoint))
                 {
-                    if (_PathRoomIndex < (_Path.RoomsSequence.Length - 1))
+                    NavigationPathHasBeenCorruptedEvent?.Invoke();
+
+                    return false;
+                }
+
+                if (isCollisionDetected)
+                {
+                    if (_FindRoomHelpPath())
                     {
-                        _PathRoomIndex++;
-                        // Произошло событие сбития с пути
-                        if (!CurrentRoom.DoesRoomContainsPoint(currentPoint))
+                        _RandomRoomPoint = null;
+                    }
+                    else if (_FindRandomPoint())
+                    {
+                        _CurrentHelpRoomPoints = null;
+                    }
+                    else
+                    {
+                        _RandomRoomPoint = null;
+                        _CurrentHelpRoomPoints = null;
+
+                        NavigationPathHasBeenBlockedEvent?.Invoke();
+                    }
+                }
+
+                // Алгоритм разрешения передвижения
+                if (isCurrentTargetPointAchived)
+                {
+                    if (_RandomRoomPoint is not null)
+                    {
+                        _RandomRoomPoint = null;
+                    }
+                    else if (_CurrentHelpRoomPoints is not null)
+                    {
+                        if (_HelpRoomPathIndex < (_CurrentHelpRoomPoints.Length - 1))
                         {
-                            NavigationPathHasBeenCorruptedEvent?.Invoke();
+                            _HelpRoomPathIndex++;
+                        }
+                        else
+                        {
+                            _CurrentHelpRoomPoints = null;
+                        }
+                    }
+                    else
+                    {
+                        if (_PathPointIndex < (Path.PointsSequence.Length - 1))
+                        {
+                            _PathPointIndex++;
+                        }
+                        else
+                        {
+                            return true;
                         }
                     }
                 }
-                // В случае, если происходит коллизия
-                if (distanceToObstacle < PathCollisionDetectionDistance)
+
+                if (!currentPoint.AreEqual(_PrevPoint))
                 {
-                    _FindNearbyRoomHelpPoint(currentPoint);
-
-                    IsCollisionDeteced = true;
-
-                    return false;
+                    _PrevPoint = currentPoint;
                 }
-                else if (isCurrentTargetPointAchived)
+
+                return false;
+            }
+
+            private bool _FindRoomHelpPath()
+            {
+                _HelpRoomPathIndex = 0;
+
+                var inRoomNavigationPath = MapGenerationScript.MapNavigation.NavigationGraph.FindPathInRoom(_PrevPoint, NextPoint);
+
+                if (inRoomNavigationPath.Length > 0)
                 {
-                    if (_CurrentHelpPoint is not null)
-                    {
-                        _CurrentHelpPoint = null;
-
-                        return false;
-                    }
-                    else if (_PathPointIndex < (_Path.PointsSequence.Length - 1))
-                    {
-                        _PathPointIndex++;
-
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
+                    _CurrentHelpRoomPoints = inRoomNavigationPath;
                 }
                 else
                 {
-                    return false;
+                    _CurrentHelpRoomPoints = null;
                 }
+
+                return _CurrentHelpRoomPoints is not null;
             }
 
-            private void _FindNearbyRoomHelpPoint(MapPoint currentPoint)
+            private bool _FindRandomPoint()
             {
-                int deltaX = 0;
+                _RandomRoomPoint = null;
 
-                if (CurrentRoom.Width != 1)
+                var randomPoints = MapGenerationScript.MapNavigation.NavigationGraph.FindDirectionInRoom(_PrevPoint, NextPoint);
+
+                if (randomPoints.Length > 0)
                 {
-                    if (currentPoint.X == (CurrentRoom.StartX + CurrentRoom.Width - 1))
+                    _RandomRoomPoint = randomPoints[MapGenerationScript.Rnd.Next(0, randomPoints.Length)];
+
+                    if (!NextRoom.AreEqual(CurrentRoom))
                     {
-                        deltaX -= MapGenerationScript.Rnd.Next(0, 2);
-                    }
-                    else if (currentPoint.X == CurrentRoom.StartX)
-                    {
-                        deltaX += MapGenerationScript.Rnd.Next(0, 2);
-                    }
-                    else
-                    {
-                        deltaX += MapGenerationScript.Rnd.Next(0, 3) - 1;
+                        _PathPointIndex = Math.Max(0, _PathPointIndex - 1);
                     }
                 }
 
-                int deltaY = 0;
-
-                if (CurrentRoom.Height != 1)
-                {
-                    if (currentPoint.Y == (CurrentRoom.StartY + CurrentRoom.Height - 1))
-                    {
-                        deltaY -= MapGenerationScript.Rnd.Next(0, 2);
-                    }
-                    else if (currentPoint.Y == CurrentRoom.StartY)
-                    {
-                        deltaY += MapGenerationScript.Rnd.Next(0, 2);
-                    }
-                    else
-                    {
-                        deltaY += MapGenerationScript.Rnd.Next(0, 3) - 1;
-                    }
-                }
-
-                _CurrentHelpPoint = new MapPoint(currentPoint.X + deltaX, currentPoint.Y + deltaY);
+                return _RandomRoomPoint is not null;
             }
         }
     }

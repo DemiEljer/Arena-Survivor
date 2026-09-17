@@ -94,7 +94,26 @@ namespace Assets.Project.Code.Scripts.Map
 
         public Vector3 GetSpawnPoint() => ObjectLocations.GetCellCentralLocation(new MapPoint(Map.Width / 2, Map.Height / 2));
 
-        public MapPoint GetRandomMapPoint() => new MapPoint(Rnd.Next(0, Map.Width), Rnd.Next(0, Map.Height));
+        public MapPoint GetRandomNoneObstacleMapPoint()
+        {
+            while (true)
+            {
+                var point = new MapPoint(Rnd.Next(0, Map.Width), Rnd.Next(0, Map.Height));
+
+                if (!MapNavigation.Obstacles[point])
+                {
+                    return point;
+                }
+            }
+        }
+
+        public MapPoint GetNearbyRoomPoint(MapPoint point)
+        {
+            var rooms = MapNavigation.NavigationGraph.GetNeighbourRooms(point);
+            var room = rooms[Rnd.Next(0, rooms.Length)];
+
+            return new MapPoint(room.StartX + Rnd.Next(0, room.Width), room.StartY + Rnd.Next(0, room.Height));
+        }
 
         public void AppendObjectAsChild(GameObject childObject)
         {

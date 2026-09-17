@@ -344,7 +344,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1258016252}
   serializedVersion: 5
-  m_Mass: 1000
+  m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 10
   m_CenterOfMass: {x: 0, y: -0.5, z: 0}
@@ -589,7 +589,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.Generators.AgentEnemyGeneratorScript
   DoesGenerateEnemies: 1
-  EnemyCount: 40
+  EnemyCount: 10
 --- !u!114 &1705757700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -764,7 +764,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd9e3502bc4651c40a054f390bd82956, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapGenerationScript
-  GenerationSeed: 0
+  GenerationSeed: -1
 --- !u!114 &1849053992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -779,9 +779,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.MapParamsScript
   Width: 15
   Height: 15
-  MaxLayerCount: 7
-  MinRoomWidth: -1
-  MinRoomHeight: -1
+  MaxLayerCount: -1
+  MinRoomWidth: 2
+  MinRoomHeight: 2
   MaxDoorsCount: 4
   IsRandomDoorsCount: 1
   CellSize: 1

@@ -33,7 +33,7 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
 
         protected override void _Update()
         {
-            _Navigation.SetCurrentLocation(_AgentTransformComponent.localPosition);
+            _Navigation.SetCurrentLocation(_AgentTransformComponent.position);
             if (BaseScript.AgentManagerScript.Params is not null)
             {
                 _Navigation.PathCollisionDetectionDistance = BaseScript.AgentManagerScript.Params.PathCollisionDetectionDistance;
@@ -53,7 +53,7 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
 
         private AgentMovementState _HandleIdleState()
         {
-            _Navigation.SetTartgetMapPoint(BaseScript.MapHandlerScript.GetRandomMapPoint());
+            _Navigation.SetTartgetMapPoint(BaseScript.MapHandlerScript.GetNearbyRoomPoint(_Navigation.CurrentMapPoint));
 
             return AgentMovementState.Moving;
         }
@@ -66,16 +66,11 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
             }
             else
             {
-                Vector3 direction = (_Navigation.CurrentTargetLocation - _AgentTransformComponent.localPosition);
+                Vector3 direction = (_Navigation.CurrentTargetLocation - _AgentTransformComponent.position);
                 direction.y = 0;
                 direction.Normalize();
 
                 _AgentTransformComponent.localRotation = Quaternion.LookRotation(direction);
-
-                Vector3 movement = (new Vector3(0, 0, 1.0f)) * Speed * Time.deltaTime;
-                //Vector3.ClampMagnitude(movement, Speed);
-
-                _AgentTransformComponent.Translate(movement);
 
                 RaycastHit raycastHit;
 
@@ -83,8 +78,24 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
                 {
                     _Navigation.DistanceToObstacle = raycastHit.distance;
                 }
+                else
+                {
+                    _Navigation.DistanceToObstacle = float.MaxValue;
+                }
 
                 _Navigation.InvokeNavigation();
+
+                if (_Navigation.IsNoPath)
+                {
+                    return AgentMovementState.Idle;
+                }
+
+                if (!_Navigation.IsCollisionDetected)
+                {
+                    Vector3 movement = (new Vector3(0, 0, 1.0f)) * Speed * Time.deltaTime;
+
+                    _AgentTransformComponent.Translate(movement);
+                }
 
                 return AgentMovementState.Moving;
             }
