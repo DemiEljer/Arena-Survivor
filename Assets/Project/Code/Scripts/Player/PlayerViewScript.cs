@@ -29,7 +29,7 @@ public class PlayerViewScript : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
 
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = 120;
     }
 
     // Update is called once per frame

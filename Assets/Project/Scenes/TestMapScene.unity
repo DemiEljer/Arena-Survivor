@@ -789,8 +789,8 @@ MonoBehaviour:
   MinRoomHeight: 2
   MaxDoorsCount: 4
   IsRandomDoorsCount: 1
-  CellSize: 1
-  WallWidth: 0.1
+  CellSize: 1.3
+  WallWidth: 0.15
   WallHeight: 1.2
   FloorHeight: 0.1
   RoofHeight: 0.1

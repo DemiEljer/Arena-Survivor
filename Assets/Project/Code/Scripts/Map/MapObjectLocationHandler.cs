@@ -168,7 +168,7 @@ namespace Assets.Project.Code.Scripts.Map
             {
                 case MapObjectOrientationEnum.Left:
                     return new Vector3(
-                    (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.WallWidth / 2.0f + (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth / 2.0f)
+                    (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.WallWidth / 2.0f + (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth * 0.3f)
                     ,
                     _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
@@ -180,11 +180,11 @@ namespace Assets.Project.Code.Scripts.Map
                     ,
                     _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y + 1) * _MapGenerationScript.Params.CellSize - _MapGenerationScript.Params.WallWidth / 2.0f + (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth / 2.0f));
+                    (float)(point.Y + 1) * _MapGenerationScript.Params.CellSize - _MapGenerationScript.Params.WallWidth / 2.0f - (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth * 0.3f));
 
                 case MapObjectOrientationEnum.Right:
                     return new Vector3(
-                    (float)(point.X + 1) * _MapGenerationScript.Params.CellSize - _MapGenerationScript.Params.WallWidth / 2.0f + (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth / 2.0f)
+                    (float)(point.X + 1) * _MapGenerationScript.Params.CellSize - _MapGenerationScript.Params.WallWidth / 2.0f - (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth * 0.3f)
                     ,
                     _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
@@ -196,7 +196,7 @@ namespace Assets.Project.Code.Scripts.Map
                     ,
                     _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.WallWidth / 2.0f + (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth / 2.0f));
+                    (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.WallWidth / 2.0f + (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth * 0.3f));
 
                 default: throw new ArgumentException();
             }
