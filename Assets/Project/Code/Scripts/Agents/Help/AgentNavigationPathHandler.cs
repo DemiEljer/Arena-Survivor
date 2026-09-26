@@ -13,7 +13,7 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 {
     public class AgentNavigationPathHandler
     {
-        public float PathCollisionDetectionDistance { get; set; } = 0.2f;
+        public AgentManagerScript AgentsManagerScript { get; }
         public MapGenerationScript MapGenerationScript { get; }
 
         private MapPoint _PreviouseMapPoint { get; set; } = new MapPoint(-1, -1);
@@ -31,8 +31,9 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
         private PathHandler _PathHandler { get; set; } = null;
 
-        public AgentNavigationPathHandler(MapGenerationScript mapGenerationScript)
+        public AgentNavigationPathHandler(AgentManagerScript agentsManager, MapGenerationScript mapGenerationScript)
         {
+            AgentsManagerScript = agentsManager;
             MapGenerationScript = mapGenerationScript;
         }
 
@@ -68,13 +69,20 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
         public void InvokeNavigation()
         {
-            IsCollisionDetected = DistanceToObstacle < PathCollisionDetectionDistance;
+            IsCollisionDetected = DistanceToObstacle < AgentsManagerScript.Params.PathCollisionDetectionDistance;
 
             bool isTargetMapPointAchived = false;
 
             if (_PathHandler is not null)
             {
-                isTargetMapPointAchived = _PathHandler.Invoke(CurrentMapPoint, IsCurrentTargetLocationAchived(), IsCollisionDetected);
+                isTargetMapPointAchived = _PathHandler.Invoke(
+                    CurrentMapPoint
+                    , 
+                    IsCurrentTargetLocationAchived()
+                    , 
+                    IsTargetLocationAchived()
+                    , 
+                    IsCollisionDetected);
             }
 
             if (_PathHandler is not null)
@@ -99,13 +107,13 @@ namespace Assets.Project.Code.Scripts.Agents.Help
             }
         }
 
-        public bool IsTargetLocationAchived() => MapObjectLocationHandler.CompareTwoLocations(CurrentLocation, TargetLocation, PathCollisionDetectionDistance);
+        public bool IsTargetLocationAchived() => MapObjectLocationHandler.CompareTwoLocations(CurrentLocation, TargetLocation, AgentsManagerScript.Params.PathTargetPointAchiveDistance);
 
-        public bool IsCurrentTargetLocationAchived() => MapObjectLocationHandler.CompareTwoLocations(CurrentLocation, CurrentTargetLocation, PathCollisionDetectionDistance);
+        public bool IsCurrentTargetLocationAchived() => MapObjectLocationHandler.CompareTwoLocations(CurrentLocation, CurrentTargetLocation, AgentsManagerScript.Params.PathInternalPointAchiveDistance);
 
         private void _CreateNewPath()
         {
-            var newPath = MapGenerationScript.MapNavigation.NavigationGraph.GetPathes(CurrentMapPoint, TargetMapPoint).FirstOrDefault();
+            var newPath = MapGenerationScript.MapNavigation.NavigationGraph.GetPathes(CurrentMapPoint, TargetMapPoint, AgentsManagerScript.Params.PathSearchingDepth).FirstOrDefault();
 
             if (newPath is not null)
             {
@@ -163,7 +171,7 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                 Path = path;
             }
 
-            public bool Invoke(MapPoint currentPoint, bool isCurrentTargetPointAchived, bool isCollisionDetected)
+            public bool Invoke(MapPoint currentPoint, bool isCurrentTargetPointAchived, bool isFinalTargetPointAchived, bool isCollisionDetected)
             {
                 if (!CurrentRoom.DoesRoomContainsPoint(currentPoint) 
                     && !NextRoom.DoesRoomContainsPoint(currentPoint))
@@ -193,7 +201,8 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                 }
 
                 // Алгоритм разрешения передвижения
-                if (isCurrentTargetPointAchived)
+                if ((isCurrentTargetPointAchived && !NextPoint.AreEqual(Path.PointTo))
+                    || (isFinalTargetPointAchived && NextPoint.AreEqual(Path.PointTo)))
                 {
                     if (_RandomRoomPoint is not null)
                     {

@@ -10,5 +10,8 @@ namespace Assets.Project.Code.Scripts.Agents
     public class AgentParamsScript : MonoBehaviour
     {
         public float PathCollisionDetectionDistance = 0.2f;
+        public float PathInternalPointAchiveDistance = 0.2f;
+        public float PathTargetPointAchiveDistance = 0.4f;
+        public int PathSearchingDepth = 5;
     }
 }

@@ -32,7 +32,7 @@ namespace Assets.Project.Code.Scripts.Map
         {
             if (_MapFabric is null)
             {
-                if (GenerationSeed > 0)
+                if (GenerationSeed >= 0)
                 {
                     _MapFabric = new MapFabric(GenerationSeed);
                 }

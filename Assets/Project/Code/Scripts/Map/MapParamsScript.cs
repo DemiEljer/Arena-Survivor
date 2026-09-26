@@ -9,6 +9,7 @@ namespace Assets.Project.Code.Scripts.Map
 {
     public class MapParamsScript : MonoBehaviour
     {
+        public bool SimpleGenerationMode = true;
         public int Width = 10;
         public int Height = 10;
         public int MaxLayerCount = -1;

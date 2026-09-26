@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 
 namespace Assets.Project.Code.Scripts.Map.Fabrics
 {
-    public class MapObstacleObjectFabricScript : AMapObjectFabricScript
+    public class MapSimpleObstacleObjectFabricScript : AMapObjectFabricScript
     {
         public GameObject[] WallsPrefabs = Array.Empty<GameObject>();
         public GameObject[] PillarsPrefabs = Array.Empty<GameObject>();

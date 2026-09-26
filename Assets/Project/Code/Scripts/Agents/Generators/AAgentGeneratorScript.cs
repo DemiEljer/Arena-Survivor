@@ -30,6 +30,7 @@ namespace Assets.Project.Code.Scripts.Agents.Generators
         public void Generate(AgentManagerScript agentManager)
         {
             if (agentManager is not null
+                && agentManager.Params is not null
                 && agentManager.MapHandlerScript is not null)
             {
                 try

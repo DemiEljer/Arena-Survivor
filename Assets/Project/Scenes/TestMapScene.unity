@@ -603,6 +603,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.AgentParamsScript
   PathCollisionDetectionDistance: 0.2
+  PathInternalPointAchiveDistance: 0.2
+  PathTargetPointAchiveDistance: 0.4
+  PathSearchingDepth: 5
 --- !u!1 &1706359427
 GameObject:
   m_ObjectHideFlags: 0
@@ -730,6 +733,7 @@ GameObject:
   - component: {fileID: 1849053995}
   - component: {fileID: 1849053994}
   - component: {fileID: 1849053993}
+  - component: {fileID: 1849053997}
   m_Layer: 0
   m_Name: MapOwner
   m_TagString: Untagged
@@ -777,6 +781,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6db5c62c63a953f4abbfb87b575f4828, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.MapParamsScript
+  SimpleGenerationMode: 0
   Width: 15
   Height: 15
   MaxLayerCount: 7
@@ -857,6 +862,30 @@ MonoBehaviour:
   DoesGenerateTorches: 1
   LightPointsDensity: 0.35
   TorchPeriod: 8
+--- !u!114 &1849053997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849053987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45ed14cfda0a52a40a398ebb9be9acf0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Fabrics.MapComplexObstaclesFabricScript
+  WallCornerRight: {fileID: 7364307720600984003, guid: d757b3c0c4e6d0a46bc03a58e65e5c5e, type: 3}
+  WallCornerLeft: {fileID: 159385570448178299, guid: a6ff66cdaf155b64995d44a560d2c386, type: 3}
+  WallFlatLeft: {fileID: 1284624065853954743, guid: 705752feac41d1146a0cc07054da4624, type: 3}
+  WallFlatRight: {fileID: 1577248111049878406, guid: b5b8d2e75237ec740bdf99a5d3c31f12, type: 3}
+  Floor: {fileID: 4464160468421923422, guid: e059e97cc591b0646878a876bc53d433, type: 3}
+  RoofNoWalls: {fileID: 6967717295449264712, guid: a74b23f945bf2bd4bbc0c825c18b1153, type: 3}
+  RoofFlat: {fileID: 2361474670886227553, guid: e4014bdc647def5488f77827e47055c3, type: 3}
+  RoofCornerLeft: {fileID: 4689490784136182542, guid: bcbde969f21cc9c47a2676b1edb2df9e, type: 3}
+  RoofCornerRight: {fileID: 1931098208483461433, guid: 8bdf90e02588a134bb4c4963b875a01e, type: 3}
+  PillarOut: {fileID: 307315366268859385, guid: 109ea66f23525dd43bf0934624f899b9, type: 3}
+  PillarIn: {fileID: 6751469367231424960, guid: 166a7cf392ad85c41a7bb1ddd8c92187, type: 3}
+  Acrh: {fileID: 727145113129082533, guid: e354ee33c0f5d134c9abc206a41342c4, type: 3}
 --- !u!1 &2100184265
 GameObject:
   m_ObjectHideFlags: 0

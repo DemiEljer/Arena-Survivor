@@ -27,17 +27,13 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
 
         protected override void _Start()
         {
-            _Navigation = new AgentNavigationPathHandler(BaseScript.MapHandlerScript);
+            _Navigation = new AgentNavigationPathHandler(BaseScript.AgentManagerScript , BaseScript.MapHandlerScript);
             _AgentTransformComponent = GetComponent<Transform>();
         }
 
         protected override void _Update()
         {
             _Navigation.SetCurrentLocation(_AgentTransformComponent.position);
-            if (BaseScript.AgentManagerScript.Params is not null)
-            {
-                _Navigation.PathCollisionDetectionDistance = BaseScript.AgentManagerScript.Params.PathCollisionDetectionDistance;
-            }
 
             switch (MovementState)
             {
