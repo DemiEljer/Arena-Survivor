@@ -972,7 +972,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Generators.MapObstacleGenerationScript
   DoesGenerateWalls: 1
   DoesGenerateFloor: 1
-  DoesGenerateRoof: 0
+  DoesGenerateRoof: 1
   DoesGenerateDoors: 1
 --- !u!114 &1849053996
 MonoBehaviour:

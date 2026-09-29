@@ -28,6 +28,7 @@ namespace Assets.Project.Code.Scripts.Map.Generators
             _ComplexObjectsFabric = GetComponent<MapComplexObstaclesFabricScript>();
 
             _RegistrateFabric(_SimpleObjectsFabric);
+            _RegistrateFabric(_ComplexObjectsFabric);
         }
 
         protected override void _Generate(MapGenerationScript mapGenerationScript)
