@@ -1031,10 +1031,12 @@ MonoBehaviour:
   CentralCellObjectsPrefabs:
   - {fileID: 5312710214832972230, guid: 6d06b282303c1934fa2f6ada4e7e39ec, type: 3}
   - {fileID: 7089720718579240026, guid: 48f62b0c256a3c94c91c4cd9d7dbda60, type: 3}
+  - {fileID: 6370175627392738867, guid: fb3fd3165d1b2634c8e572fb63fa8fab, type: 3}
   WallObjectsPrefabs:
   - {fileID: 4924990057736740162, guid: 4f136323a098df54282507f813766570, type: 3}
   - {fileID: 5312710214832972230, guid: 6d06b282303c1934fa2f6ada4e7e39ec, type: 3}
   - {fileID: 7089720718579240026, guid: 48f62b0c256a3c94c91c4cd9d7dbda60, type: 3}
+  - {fileID: 6370175627392738867, guid: fb3fd3165d1b2634c8e572fb63fa8fab, type: 3}
 --- !u!114 &1849053999
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1048,7 +1050,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Generators.MapStaticObjectGenerationScript
   DoesGenerateObjects: 1
-  DensityFactor: 0.4
+  DensityFactor: 0.2
   WallOffset: 0.3
 --- !u!1 &2100184265
 GameObject:
