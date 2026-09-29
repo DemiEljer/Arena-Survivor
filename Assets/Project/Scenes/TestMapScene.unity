@@ -859,9 +859,11 @@ GameObject:
   - component: {fileID: 1849053992}
   - component: {fileID: 1849053996}
   - component: {fileID: 1849053995}
+  - component: {fileID: 1849053999}
   - component: {fileID: 1849053994}
   - component: {fileID: 1849053993}
   - component: {fileID: 1849053997}
+  - component: {fileID: 1849053998}
   m_Layer: 0
   m_Name: MapOwner
   m_TagString: Untagged
@@ -1014,6 +1016,40 @@ MonoBehaviour:
   PillarOut: {fileID: 307315366268859385, guid: 109ea66f23525dd43bf0934624f899b9, type: 3}
   PillarIn: {fileID: 6751469367231424960, guid: 166a7cf392ad85c41a7bb1ddd8c92187, type: 3}
   Acrh: {fileID: 727145113129082533, guid: e354ee33c0f5d134c9abc206a41342c4, type: 3}
+--- !u!114 &1849053998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849053987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdf2cfddcbac127499115a5f70570932, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Fabrics.MapStaticObjectFabricScript
+  CentralCellObjectsPrefabs:
+  - {fileID: 5312710214832972230, guid: 6d06b282303c1934fa2f6ada4e7e39ec, type: 3}
+  - {fileID: 7089720718579240026, guid: 48f62b0c256a3c94c91c4cd9d7dbda60, type: 3}
+  WallObjectsPrefabs:
+  - {fileID: 4924990057736740162, guid: 4f136323a098df54282507f813766570, type: 3}
+  - {fileID: 5312710214832972230, guid: 6d06b282303c1934fa2f6ada4e7e39ec, type: 3}
+  - {fileID: 7089720718579240026, guid: 48f62b0c256a3c94c91c4cd9d7dbda60, type: 3}
+--- !u!114 &1849053999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849053987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7284a2d8f94f9dc4d8df21f9294a2a40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Generators.MapStaticObjectGenerationScript
+  DoesGenerateObjects: 1
+  DensityFactor: 0.4
+  WallOffset: 0.3
 --- !u!1 &2100184265
 GameObject:
   m_ObjectHideFlags: 0

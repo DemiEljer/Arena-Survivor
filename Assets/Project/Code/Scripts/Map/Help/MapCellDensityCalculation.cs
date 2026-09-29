@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine.Rendering;
 
 namespace Assets.Project.Code.Scripts.Map.Help
 {
@@ -174,6 +176,13 @@ namespace Assets.Project.Code.Scripts.Map.Help
                     break;
                 }
             }
+        }
+
+        public void Maximize(MapPoint point) => Maximize(point.X, point.Y);
+
+        public void Maximize(int x, int y)
+        {
+            this[x, y] = 1;
         }
 
         public void Foreach(Action<MapPoint, float> handler)
