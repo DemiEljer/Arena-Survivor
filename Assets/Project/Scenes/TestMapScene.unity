@@ -703,7 +703,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 801c80a2300063643bd3f15dba2180d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.Fabrics.AgentEnemyFabricScript
-  DefaultEnemyPrefab: {fileID: 4176891692188349743, guid: 7c81dd27ef26f054baf50964f14a792b, type: 3}
+  DefaultEnemyPrefab: {fileID: 1305328787837311285, guid: 39aec0048d5d93747b88517a11c02489, type: 3}
 --- !u!114 &1705757699
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -957,7 +957,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Fabrics.MapLightObjectFabricScript
   LightPointPrefab: {fileID: 7081736130214465388, guid: a54e745d65cc2914d9cebec116f17a10, type: 3}
-  TorchPrefab: {fileID: 7320240724547625862, guid: 1ec9da513e7a7524c80a84f85c2ad5e1, type: 3}
+  TorchPrefab: {fileID: 7320240724547625862, guid: 898daf4e3f69ca24f89fa80645fe3893, type: 3}
 --- !u!114 &1849053995
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -972,7 +972,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Generators.MapObstacleGenerationScript
   DoesGenerateWalls: 1
   DoesGenerateFloor: 1
-  DoesGenerateRoof: 1
+  DoesGenerateRoof: 0
   DoesGenerateDoors: 1
 --- !u!114 &1849053996
 MonoBehaviour:

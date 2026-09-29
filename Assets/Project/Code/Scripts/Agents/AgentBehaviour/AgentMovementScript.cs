@@ -1,4 +1,5 @@
 ﻿using Assets.Project.Code.Scripts.Agents.Help;
+using MapGenearionLibrary.Base;
 using MapGenearionLibrary.Navigation;
 using System;
 using System.Collections.Generic;
@@ -15,11 +16,14 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
         public enum AgentMovementState
         {
             Idle = 0,
-            Moving = 1
+            Moving = 1,
+            Rotation = 2
         }
 
         [SerializeField]
-        public float Speed = 2f;
+        public float MovementSpeed = 2f;
+        [SerializeField]
+        public float RotationSpeed = 180f;
         public AgentMovementState MovementState { get; private set; } = AgentMovementState.Idle;
 
         private AgentNavigationPathHandler _Navigation { get; set; }
@@ -44,6 +48,10 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
                 case AgentMovementState.Moving:
                     MovementState = _HandleMovementState();
                     break;
+
+                case AgentMovementState.Rotation:
+                    MovementState = _HandleRotationState();
+                    break;
             }
         }
 
@@ -51,7 +59,7 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
         {
             _Navigation.SetTartgetMapPoint(BaseScript.MapHandlerScript.GetNearbyRoomPoint(_Navigation.CurrentMapPoint));
 
-            return AgentMovementState.Moving;
+            return AgentMovementState.Rotation;
         }
 
         private AgentMovementState _HandleMovementState()
@@ -62,6 +70,8 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
             }
             else
             {
+                var prevTargetPoint = _Navigation.CurrentTargetMapPoint;
+
                 Vector3 direction = (_Navigation.CurrentTargetLocation - _AgentTransformComponent.position);
                 direction.y = 0;
                 direction.Normalize();
@@ -88,12 +98,42 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
 
                 if (!_Navigation.IsCollisionDetected)
                 {
-                    Vector3 movement = (new Vector3(0, 0, 1.0f)) * Speed * Time.deltaTime;
+                    Vector3 movement = (new Vector3(0, 0, 1.0f)) * MovementSpeed * Time.deltaTime;
 
                     _AgentTransformComponent.Translate(movement);
                 }
 
+                if (!_Navigation.CurrentTargetMapPoint.AreEqual(prevTargetPoint))
+                {
+                    return AgentMovementState.Rotation;
+                }
+                else
+                {
+                    return AgentMovementState.Moving;
+                }
+            }
+        }
+
+        private AgentMovementState _HandleRotationState()
+        {
+            Vector3 direction = (_Navigation.CurrentTargetLocation - _AgentTransformComponent.position);
+            direction.y = 0;
+            direction.Normalize();
+
+            var targetRotation = Quaternion.LookRotation(direction);
+
+            _AgentTransformComponent.localRotation = Quaternion.RotateTowards(
+                _AgentTransformComponent.localRotation,
+                targetRotation,
+                RotationSpeed * Time.deltaTime);
+
+            if (Quaternion.Angle(_AgentTransformComponent.localRotation, targetRotation) < 5.0f)
+            {
                 return AgentMovementState.Moving;
+            }
+            else
+            {
+                return AgentMovementState.Rotation;
             }
         }
     }
