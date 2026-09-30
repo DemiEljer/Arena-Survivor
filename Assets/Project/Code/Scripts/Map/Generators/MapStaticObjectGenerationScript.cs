@@ -122,7 +122,7 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                     {
                         newStaticObject.transform.localPosition = mapGenerationScript.ObjectLocations.GetWallFloorSurfaceLocation(point, wallOrientation, newStaticObject.GetTotalObjectBounds(), ObjectsWallOffset);
 
-                        newStaticObject.name = $"StaticObject_{wallOrientation}_Wall";
+                        newStaticObject.name = $"StaticObject";
                     }
 
                     return newStaticObject;
