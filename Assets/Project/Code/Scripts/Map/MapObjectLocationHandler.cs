@@ -162,13 +162,29 @@ namespace Assets.Project.Code.Scripts.Map
             }
         }
 
-        public Vector3 GetWallCentralSurfaceLocation(MapPoint point, MapObjectOrientationEnum wallOrientation)
+        public Vector3 GetWallCentralSurfaceLocation(MapPoint point, MapObjectOrientationEnum wallOrientation, Bounds objectBounds, float offset = 0.0f)
+        {
+            if (wallOrientation == MapObjectOrientationEnum.Left || wallOrientation == MapObjectOrientationEnum.Right)
+            {
+                return GetWallCentralSurfaceLocation(point, wallOrientation, objectBounds.size.x / 2.0f + offset);
+            }
+            else if (wallOrientation == MapObjectOrientationEnum.Top || wallOrientation == MapObjectOrientationEnum.Bottom)
+            {
+                return GetWallCentralSurfaceLocation(point, wallOrientation, objectBounds.size.z / 2.0f + offset);
+            }
+            else
+            {
+                throw new ArgumentException();
+            }
+        }
+
+        public Vector3 GetWallCentralSurfaceLocation(MapPoint point, MapObjectOrientationEnum wallOrientation, float offset = 0.0f)
         {
             switch (wallOrientation)
             {
                 case MapObjectOrientationEnum.Left:
                     return new Vector3(
-                    (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.WallWidth / 2.0f + (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth * 0.3f)
+                    (float)(point.X) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.WallWidth / 2.0f + (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth * 0.3f) + offset
                     ,
                     _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
@@ -180,11 +196,11 @@ namespace Assets.Project.Code.Scripts.Map
                     ,
                     _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y + 1) * _MapGenerationScript.Params.CellSize - _MapGenerationScript.Params.WallWidth / 2.0f - (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth * 0.3f));
+                    (float)(point.Y + 1) * _MapGenerationScript.Params.CellSize - _MapGenerationScript.Params.WallWidth / 2.0f - (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth * 0.3f) - offset);
 
                 case MapObjectOrientationEnum.Right:
                     return new Vector3(
-                    (float)(point.X + 1) * _MapGenerationScript.Params.CellSize - _MapGenerationScript.Params.WallWidth / 2.0f - (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth * 0.3f)
+                    (float)(point.X + 1) * _MapGenerationScript.Params.CellSize - _MapGenerationScript.Params.WallWidth / 2.0f - (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth * 0.3f) - offset
                     ,
                     _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
@@ -196,9 +212,25 @@ namespace Assets.Project.Code.Scripts.Map
                     ,
                     _MapGenerationScript.Params.WallHeight / 2.0f
                     ,
-                    (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.WallWidth / 2.0f + (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth * 0.3f));
+                    (float)(point.Y) * _MapGenerationScript.Params.CellSize + _MapGenerationScript.Params.WallWidth / 2.0f + (_MapGenerationScript.Params.SimpleGenerationMode ? 0.0f : _MapGenerationScript.Params.WallWidth * 0.3f) + offset);
 
                 default: throw new ArgumentException();
+            }
+        }
+
+        public Vector3 GetWallFloorSurfaceLocation(MapPoint point, MapObjectOrientationEnum wallOrientation, Bounds objectBounds, float offset = 0.0f)
+        {
+            if (wallOrientation == MapObjectOrientationEnum.Left || wallOrientation == MapObjectOrientationEnum.Right)
+            {
+                return GetWallFloorSurfaceLocation(point, wallOrientation, objectBounds.size.x / 2.0f + offset);
+            }
+            else if (wallOrientation == MapObjectOrientationEnum.Top || wallOrientation == MapObjectOrientationEnum.Bottom)
+            {
+                return GetWallFloorSurfaceLocation(point, wallOrientation, objectBounds.size.z / 2.0f + offset);
+            }
+            else
+            {
+                throw new ArgumentException();
             }
         }
 

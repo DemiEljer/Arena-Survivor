@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using MapGenearionLibrary.Navigation;
 using Assets.Project.Code.Scripts.Map.Generators;
 using MapGenearionLibrary.Base;
+using System.Linq;
 
 namespace Assets.Project.Code.Scripts.Map
 {
@@ -19,6 +20,8 @@ namespace Assets.Project.Code.Scripts.Map
         public MapParamsScript Params { get; private set; }
         public MapGenearionLibrary.Map Map { get; private set; }
         public MapNavigationHandler MapNavigation { get; private set; }
+        public MapGeneratedObjectsManager GeneratedObjects { get; private set; } = new();
+
         public MapObjectLocationHandler ObjectLocations { get; private set; }
         public event Action<MapGenerationScript> MapHasBeenGeneratedEvent;
 
@@ -122,6 +125,25 @@ namespace Assets.Project.Code.Scripts.Map
             if (childObjectTransform is not null)
             {
                 childObjectTransform.parent = _MapOwnerTransform;
+            }
+        }
+
+        public bool HandleObjectGeneration(MapPoint point, MapObjectOrientationEnum orientation, Func<GameObject> creationDelegate)
+        {
+            if (point is null || creationDelegate is null)
+            {
+                return false;
+            }
+
+            if (GeneratedObjects.GetObjectsInMapCell(point).FirstOrDefault(objectInfo => objectInfo.Orientation == orientation) is null)
+            {
+                GeneratedObjects.AppendObject(point, orientation, creationDelegate?.Invoke());
+
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
     }

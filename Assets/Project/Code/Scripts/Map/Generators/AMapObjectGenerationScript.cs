@@ -16,6 +16,8 @@ namespace Assets.Project.Code.Scripts.Map.Generators
 
         public event Action<GameObject> ObjectHasBeenGeneratedEvent;
 
+        public event Action<AMapObjectGenerationScript> GenerationHasBeenFinishedEvent;
+
         private void Start()
         {
             _MapGenerationScript = GetComponent<MapGenerationScript>();
@@ -35,6 +37,8 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                 try
                 {
                     _Generate(mapGenerationScript);
+
+                    GenerationHasBeenFinishedEvent?.Invoke(this);
                 }
                 catch (Exception e)
                 {

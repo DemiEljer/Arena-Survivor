@@ -16,5 +16,6 @@ namespace Assets.Project.Code.Scripts.Map
         TopRight = 5,
         BottomLeft = 6,
         BottomRight = 7,
+        Center = 8
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Assets.Project.Code.Scripts.Map.Fabrics;
 using Assets.Project.Code.Scripts.Map.Help;
+using Assets.Project.Code.Standard.Objects;
 using MapGenearionLibrary.Base;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace Assets.Project.Code.Scripts.Map.Generators
     {
         public bool DoesGenerateObjects = false;
         public float DensityFactor = 0.9f;
-        public float WallOffset = 0.5f;
+        public float ObjectsWallOffset = 0.05f;
 
         private MapStaticObjectFabricScript _Fabric { get; set; }
 
@@ -89,31 +90,45 @@ namespace Assets.Project.Code.Scripts.Map.Generators
 
             void _CreateCellCentralObject(MapPoint point)
             {
-                Vector3 objectLocation = mapGenerationScript.ObjectLocations.GetCellCentralFloorLocation(point);
-                Quaternion objectQuanterion = mapGenerationScript.ObjectLocations.GetObjectRotation((MapObjectOrientationEnum)(MapGenerationScript.Rnd.Next(4)));
-
-                var newWall = _Fabric.CreateCentralCellObject(objectLocation, objectQuanterion);
-
-                mapGenerationScript.MapNavigation.Obstacles[point] = true;
-
-                if (newWall is not null)
+                mapGenerationScript.HandleObjectGeneration(point, MapObjectOrientationEnum.Center, () =>
                 {
-                    newWall.name = $"StaticObject";
-                }
+                    Vector3 objectLocation = mapGenerationScript.ObjectLocations.GetCellCentralFloorLocation(point);
+                    Quaternion objectQuanterion = mapGenerationScript.ObjectLocations.GetObjectRotation((MapObjectOrientationEnum)(MapGenerationScript.Rnd.Next(4)));
+
+                    var newStaticObject = _Fabric.CreateCentralCellObject(objectLocation, objectQuanterion);
+
+                    mapGenerationScript.MapNavigation.Obstacles[point] = true;
+
+                    if (newStaticObject is not null)
+                    {
+                        newStaticObject.name = $"StaticObject";
+                    }
+
+                    return newStaticObject;
+                });
             }
 
             void _CreateWallObject(MapPoint point, MapObjectOrientationEnum wallOrientation)
             {
-                Vector3 objectLocation = mapGenerationScript.ObjectLocations.GetWallFloorSurfaceLocation(point, wallOrientation, WallOffset);
-                Quaternion objectQuanterion = mapGenerationScript.ObjectLocations.GetObjectRotation(wallOrientation);
-
-                var newWall = _Fabric.CreateWallObject(objectLocation, objectQuanterion);
-
-                mapGenerationScript.MapNavigation.Obstacles[point] = true;
-
-                if (newWall is not null)
+                if (!mapGenerationScript.HandleObjectGeneration(point, wallOrientation, () =>
                 {
-                    newWall.name = $"StaticObject";
+                    Quaternion objectQuanterion = mapGenerationScript.ObjectLocations.GetObjectRotation(wallOrientation);
+
+                    var newStaticObject = _Fabric.CreateWallObject(Vector3.zero, objectQuanterion);
+
+                    mapGenerationScript.MapNavigation.Obstacles[point] = true;
+
+                    if (newStaticObject is not null)
+                    {
+                        newStaticObject.transform.localPosition = mapGenerationScript.ObjectLocations.GetWallFloorSurfaceLocation(point, wallOrientation, newStaticObject.GetTotalObjectBounds(), ObjectsWallOffset);
+
+                        newStaticObject.name = $"StaticObject_{wallOrientation}_Wall";
+                    }
+
+                    return newStaticObject;
+                }))
+                {
+                    cellsDensity.Maximize(point);
                 }
             }
 

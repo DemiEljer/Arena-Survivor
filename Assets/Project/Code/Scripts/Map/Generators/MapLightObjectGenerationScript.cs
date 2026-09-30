@@ -56,9 +56,10 @@ namespace Assets.Project.Code.Scripts.Map.Generators
 
                     if ((cellIndex % torchPeriod) == 0 && isWall)
                     {
-                        _CreateTorch(point, orientation);
-
-                        cellIndex++;
+                        if (_CreateTorch(point, orientation))
+                        {
+                            cellIndex++;
+                        }
                     }
                     else if (isWall)
                     {
@@ -93,15 +94,20 @@ namespace Assets.Project.Code.Scripts.Map.Generators
                 }
             }
 
-            void _CreateTorch(MapPoint torchLocation, MapObjectOrientationEnum orientation)
+            bool _CreateTorch(MapPoint torchLocation, MapObjectOrientationEnum orientation)
             {
-                var newTorchObject = _ObjectsFabric.CreateTorch
-                (
-                    mapGenerationScript.ObjectLocations.GetWallCentralSurfaceLocation(torchLocation, orientation)
-                    ,
-                    mapGenerationScript.ObjectLocations.GetObjectRotation(orientation)
-                );
-                newTorchObject.name = "Torch";
+                return mapGenerationScript.HandleObjectGeneration(torchLocation, orientation, () =>
+                {
+                    var newTorchObject = _ObjectsFabric.CreateTorch
+                    (
+                        mapGenerationScript.ObjectLocations.GetWallCentralSurfaceLocation(torchLocation, orientation)
+                        ,
+                        mapGenerationScript.ObjectLocations.GetObjectRotation(orientation)
+                    );
+                    newTorchObject.name = "Torch";
+
+                    return newTorchObject;
+                });
             }
 
             if (DoesGenerateLightPoints)
