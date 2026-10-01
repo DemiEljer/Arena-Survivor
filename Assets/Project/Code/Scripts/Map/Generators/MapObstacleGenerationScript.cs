@@ -92,7 +92,7 @@ namespace Assets.Project.Code.Scripts.Map.Generators
 
                 if (newFloor is not null)
                 {
-                    newFloor.name = $"Floor";
+                    newFloor.name = $"Floor_{point.X}_{point.Y}";
                 }
             }
 
@@ -388,7 +388,7 @@ namespace Assets.Project.Code.Scripts.Map.Generators
 
                 if (newFloor is not null)
                 {
-                    newFloor.name = $"Floor";
+                    newFloor.name = $"Floor_{point.X}_{point.Y}";
                 }
             }
 

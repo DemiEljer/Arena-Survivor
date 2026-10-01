@@ -717,7 +717,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.Generators.AgentEnemyGeneratorScript
   DoesGenerateEnemies: 1
-  EnemyCount: 10
+  EnemyCount: 20
 --- !u!114 &1705757700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -730,10 +730,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da377a6724f71c448b8992dd2d7ed623, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.AgentParamsScript
-  PathCollisionDetectionDistance: 0.2
+  PathCollisionDetectionDistance: 0.3
   PathInternalPointAchiveDistance: 0.2
   PathTargetPointAchiveDistance: 0.4
   PathSearchingDepth: 5
+  MaxCollisionsCount: 1
 --- !u!1 &1706359427
 GameObject:
   m_ObjectHideFlags: 0
@@ -915,8 +916,8 @@ MonoBehaviour:
   Width: 15
   Height: 15
   MaxLayerCount: 7
-  MinRoomWidth: 2
-  MinRoomHeight: 2
+  MinRoomWidth: 3
+  MinRoomHeight: 3
   MaxDoorsCount: 4
   IsRandomDoorsCount: 1
   CellSize: 1.3
@@ -974,7 +975,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Generators.MapObstacleGenerationScript
   DoesGenerateWalls: 1
   DoesGenerateFloor: 1
-  DoesGenerateRoof: 1
+  DoesGenerateRoof: 0
   DoesGenerateDoors: 1
 --- !u!114 &1849053996
 MonoBehaviour:
@@ -1050,8 +1051,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Map.Generators.MapStaticObjectGenerationScript
   DoesGenerateObjects: 1
-  DensityFactor: 0.2
-  WallOffset: 0.3
+  DensityFactor: 0.4
+  ObjectsWallOffset: 0.05
 --- !u!1 &2100184265
 GameObject:
   m_ObjectHideFlags: 0

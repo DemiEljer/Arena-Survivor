@@ -1,4 +1,5 @@
 using Assets.Project.Code.Scripts.Map;
+using Assets.Project.Code.Scripts.Map.Help;
 using MapGenearionLibrary.Base;
 using UnityEngine;
 
@@ -8,8 +9,7 @@ public class PlayerMapSpawnScript : MonoBehaviour
 
     private Transform _PlayerTransformComponent { get; set; }
     private MapGenerationScript _MapGenerationScript { get; set; }
-
-    private MapPoint _PreviousePlayerMapPoint { get; set; } = null;
+    private MapObstacleObjectAssociation _MapLocationAssociation { get; set; }
 
     void Start()
     {
@@ -22,27 +22,19 @@ public class PlayerMapSpawnScript : MonoBehaviour
                 _MapGenerationScript.MapHasBeenGeneratedEvent += MapHasBeenGeneratedEventHandler;
             }
         }
-
+        
         _PlayerTransformComponent = GetComponent<Transform>();
     }
 
 
     void Update()
     {
-        if (_MapGenerationScript is not null
-            && _PlayerTransformComponent is not null
-            && _PreviousePlayerMapPoint is not null)
+        if (_MapLocationAssociation is not null)
         {
             var currentPlayerLocation = _PlayerTransformComponent.position;
             var currentPlayerMapPoint = _MapGenerationScript.ObjectLocations.GetCellMapPoint(currentPlayerLocation);
 
-            if (!currentPlayerMapPoint.AreEqual(_PreviousePlayerMapPoint))
-            {
-                _MapGenerationScript.MapNavigation.Obstacles[_PreviousePlayerMapPoint] = false;
-                _MapGenerationScript.MapNavigation.Obstacles[currentPlayerMapPoint] = true;
-
-                _PreviousePlayerMapPoint = currentPlayerMapPoint;
-            }
+            _MapLocationAssociation.Location = currentPlayerMapPoint;
         }
     }
 
@@ -50,9 +42,7 @@ public class PlayerMapSpawnScript : MonoBehaviour
     {
         if (_PlayerTransformComponent is not null)
         {
-            _PlayerTransformComponent.localPosition = mapHandlerScript.GetSpawnPoint();
-            _PreviousePlayerMapPoint = _MapGenerationScript.ObjectLocations.GetCellMapPoint(_PlayerTransformComponent.position);
-            _MapGenerationScript.MapNavigation.Obstacles[_PreviousePlayerMapPoint] = true;
+            _MapLocationAssociation = new MapObstacleObjectAssociation(_MapGenerationScript);
         }
     }
 }

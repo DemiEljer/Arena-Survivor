@@ -1,4 +1,5 @@
 ﻿using Assets.Project.Code.Scripts.Map;
+using Assets.Project.Code.Scripts.Map.Help;
 using MapGenearionLibrary.Base;
 using MapGenearionLibrary.Navigation;
 using System;
@@ -16,8 +17,6 @@ namespace Assets.Project.Code.Scripts.Agents.Help
         public AgentManagerScript AgentsManagerScript { get; }
         public MapGenerationScript MapGenerationScript { get; }
 
-        private MapPoint _PreviouseMapPoint { get; set; } = new MapPoint(-1, -1);
-
         public float DistanceToObstacle { get; set; }
         public Vector3 CurrentLocation { get; private set; }
         public MapPoint CurrentMapPoint { get; private set; }
@@ -30,11 +29,13 @@ namespace Assets.Project.Code.Scripts.Agents.Help
         public bool IsNoPath => _PathHandler is null;
 
         private PathHandler _PathHandler { get; set; } = null;
+        private MapObstacleObjectAssociation _MapLocationAssociation { get; set; }
 
         public AgentNavigationPathHandler(AgentManagerScript agentsManager, MapGenerationScript mapGenerationScript)
         {
             AgentsManagerScript = agentsManager;
             MapGenerationScript = mapGenerationScript;
+            _MapLocationAssociation = new MapObstacleObjectAssociation(mapGenerationScript);
         }
 
         public void SetCurrentLocation(Vector3 currentLocation)
@@ -42,13 +43,7 @@ namespace Assets.Project.Code.Scripts.Agents.Help
             CurrentLocation = currentLocation;
             CurrentMapPoint = MapGenerationScript.ObjectLocations.GetCellMapPoint(CurrentLocation);
 
-            if (!_PreviouseMapPoint.AreEqual(CurrentMapPoint))
-            {
-                MapGenerationScript.MapNavigation.Obstacles[_PreviouseMapPoint] = false;
-                MapGenerationScript.MapNavigation.Obstacles[CurrentMapPoint] = true;
-
-                _PreviouseMapPoint = CurrentMapPoint;
-            }
+            _MapLocationAssociation.Location = CurrentMapPoint;
         }
 
         public void SetTartgetMapPoint(MapPoint targetMapPoint)
@@ -117,7 +112,7 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
             if (newPath is not null)
             {
-                _PathHandler = new PathHandler(MapGenerationScript, newPath);
+                _PathHandler = new PathHandler(MapGenerationScript, AgentsManagerScript, newPath);
                 // Событие повторного построения пути
                 _PathHandler.NavigationPathHasBeenCorruptedEvent += _CreateNewPath;
                 // Событие полной блокировки пути
@@ -131,7 +126,8 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
         public class PathHandler
         {
-            MapGenerationScript MapGenerationScript { get; }
+            public MapGenerationScript MapGenerationScript { get; }
+            public AgentManagerScript AgentManagerScript { get; }
             public MapNavigationGraphPath Path { get; }
 
             public MapPoint NextPoint
@@ -163,11 +159,45 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
             private MapPoint[] _CurrentHelpRoomPoints { get; set; } = null;
             private MapPoint _RandomRoomPoint { get; set; } = null;
-            private MapPoint _PrevPoint { get; set; } = new MapPoint(-1, -1);
+            private bool _PrevCollisionStatus { get; set; } = false;
+            private MapPoint _PrevPoint
+            {
+                get
+                {
+                    if (_PathTrace.Count == 0)
+                    {
+                        return new MapPoint();
+                    }
+                    else if (_PathTrace.Count == 1)
+                    {
+                        return _PathTrace[0];
+                    }
+                    else
+                    {
+                        return _PathTrace[_PathTrace.Count - 2];
+                    }
+                }
+            }
+            private MapPoint _LastPoint
+            {
+                get
+                {
+                    if (_PathTrace.Count == 0)
+                    {
+                        return new MapPoint();
+                    }
+                    else
+                    {
+                        return _PathTrace.Last();
+                    }
+                }
+            }
+            private List<MapPoint> _PathTrace { get; } = new();
 
-            public PathHandler(MapGenerationScript mapGenerationScript, MapNavigationGraphPath path)
+            public PathHandler(MapGenerationScript mapGenerationScript, AgentManagerScript agentManagerScript, MapNavigationGraphPath path)
             {
                 MapGenerationScript = mapGenerationScript;
+                AgentManagerScript = agentManagerScript;
                 Path = path;
             }
 
@@ -181,24 +211,25 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                     return false;
                 }
 
-                if (isCollisionDetected)
+                if (isCollisionDetected && !_PrevCollisionStatus)
                 {
-                    if (_FindRoomHelpPath())
-                    {
-                        _RandomRoomPoint = null;
-                    }
+                    _RandomRoomPoint = null;
+                    _CurrentHelpRoomPoints = null;
+
+                    if (_FindRoomHelpPath()) {}
                     else if (_FindRandomPoint())
                     {
-                        _CurrentHelpRoomPoints = null;
+                        if (_PathTrace.Where(tracePoint => tracePoint.AreEqual(_RandomRoomPoint)).Count() > AgentManagerScript.Params.MaxCollisionsCount)
+                        {
+                            NavigationPathHasBeenBlockedEvent?.Invoke();
+                        }
                     }
                     else
                     {
-                        _RandomRoomPoint = null;
-                        _CurrentHelpRoomPoints = null;
-
                         NavigationPathHasBeenBlockedEvent?.Invoke();
                     }
                 }
+                _PrevCollisionStatus = isCollisionDetected;
 
                 // Алгоритм разрешения передвижения
                 if ((isCurrentTargetPointAchived && !NextPoint.AreEqual(Path.PointTo))
@@ -232,9 +263,9 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                     }
                 }
 
-                if (!currentPoint.AreEqual(_PrevPoint))
+                if (!_LastPoint.AreEqual(currentPoint))
                 {
-                    _PrevPoint = currentPoint;
+                    _PathTrace.Add(currentPoint);
                 }
 
                 return false;
