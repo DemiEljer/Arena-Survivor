@@ -97,7 +97,7 @@ namespace Assets.Project.Code.Scripts.Map.Generators
 
                     var newStaticObject = _Fabric.CreateCentralCellObject(objectLocation, objectQuanterion);
 
-                    mapGenerationScript.MapNavigation.Obstacles[point] = true;
+                    mapGenerationScript.MapNavigation.StaticObstacles[point] = true;
 
                     if (newStaticObject is not null)
                     {
@@ -116,7 +116,7 @@ namespace Assets.Project.Code.Scripts.Map.Generators
 
                     var newStaticObject = _Fabric.CreateWallObject(Vector3.zero, objectQuanterion);
 
-                    mapGenerationScript.MapNavigation.Obstacles[point] = true;
+                    mapGenerationScript.MapNavigation.StaticObstacles[point] = true;
 
                     if (newStaticObject is not null)
                     {

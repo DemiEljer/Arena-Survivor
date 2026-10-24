@@ -24,9 +24,9 @@ namespace Assets.Project.Code.Scripts.Map.Help
                 {
                     if (_Location.AreEqual(value))
                     {
-                        MapGenerationScript.MapNavigation.Obstacles[_Location] = false;
+                        MapGenerationScript.MapNavigation.StaticObstacles[_Location] = false;
                         _Location = value;
-                        MapGenerationScript.MapNavigation.Obstacles[_Location] = true;
+                        MapGenerationScript.MapNavigation.StaticObstacles[_Location] = true;
                     }
                 }
             }

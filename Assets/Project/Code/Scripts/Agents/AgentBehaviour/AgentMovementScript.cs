@@ -57,7 +57,8 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
 
         private AgentMovementState _HandleIdleState()
         {
-            _Navigation.SetTartgetMapPoint(BaseScript.MapHandlerScript.GetNearbyRoomPoint(_Navigation.CurrentMapPoint));
+            //_Navigation.SetTartgetMapPoint(BaseScript.MapHandlerScript.GetNearbyRoomPoint(_Navigation.CurrentMapPoint));
+            _Navigation.SetTartgetMapPoint(BaseScript.MapHandlerScript.GetRandomNoneObstacleMapPoint());
 
             return AgentMovementState.Rotation;
         }

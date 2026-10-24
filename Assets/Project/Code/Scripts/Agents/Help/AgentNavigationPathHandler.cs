@@ -108,7 +108,8 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
         private void _CreateNewPath()
         {
-            var newPath = MapGenerationScript.MapNavigation.NavigationGraph.GetPathes(CurrentMapPoint, TargetMapPoint, AgentsManagerScript.Params.PathSearchingDepth).FirstOrDefault();
+            var newPath = MapGenerationScript.MapNavigation.NavigationGraph.FindPathWave(CurrentMapPoint, TargetMapPoint, AgentsManagerScript.Params.PathSearchingDepth);
+            //MapGenerationScript.MapNavigation.NavigationGraph.GetPathes(CurrentMapPoint, TargetMapPoint, AgentsManagerScript.Params.PathSearchingDepth).FirstOrDefault();
 
             if (newPath is not null)
             {
@@ -140,7 +141,7 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                     }
                     else if (_CurrentHelpRoomPoints is null)
                     {
-                        return Path.PointsSequence[_PathPointIndex].point;
+                        return Path.PointsSequence[_PathPointIndex].Point;
                     }
                     else
                     {
@@ -148,8 +149,9 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                     }
                 }
             }
-            public MapRoom CurrentRoom => _PathPointIndex > 0 ? Path.PointsSequence[_PathPointIndex - 1].room : NextRoom;
-            public MapRoom NextRoom => Path.PointsSequence[_PathPointIndex].room;
+
+            public MapRoom CurrentRoom => _PathPointIndex > 0 ? Path.PointsSequence[_PathPointIndex - 1].Room : NextRoom;
+            public MapRoom NextRoom => Path.PointsSequence[_PathPointIndex].Room;
 
             public event Action NavigationPathHasBeenCorruptedEvent;
             public event Action NavigationPathHasBeenBlockedEvent;

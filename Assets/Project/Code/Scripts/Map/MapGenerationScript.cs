@@ -103,7 +103,7 @@ namespace Assets.Project.Code.Scripts.Map
             {
                 var point = new MapPoint(Rnd.Next(0, Map.Width), Rnd.Next(0, Map.Height));
 
-                if (!MapNavigation.Obstacles[point])
+                if (!MapNavigation.StaticObstacles[point])
                 {
                     return point;
                 }
