@@ -1,4 +1,5 @@
 ﻿using Assets.Project.Code.Scripts.Map;
+using Assets.Project.Code.Standard.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +12,19 @@ namespace Assets.Project.Code.Scripts.Agents
 {
     public class AgentBaseScript : MonoBehaviour
     {
+        private static CollectionUniqIndexer _Indexer { get; } = new();
+
+        public ulong ObjectIndex { get; }
+
         public MapGenerationScript MapHandlerScript { get; private set; }
         public AgentManagerScript AgentManagerScript { get; private set; }
 
         public Action<AgentBaseScript> ObjectHasBeenDisposedEvent;
+
+        public AgentBaseScript()
+        {
+            ObjectIndex = _Indexer.GetNextIndex();
+        }
 
         void Start()
         {

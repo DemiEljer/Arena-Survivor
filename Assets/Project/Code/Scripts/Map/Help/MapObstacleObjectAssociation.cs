@@ -13,6 +13,8 @@ namespace Assets.Project.Code.Scripts.Map.Help
 
         private MapPoint _Location { get; set; } = new MapPoint(-1, -1);
 
+        private Object _ObjectAssosiation { get; }
+
         public MapPoint Location 
         {
             get => _Location;
@@ -22,19 +24,23 @@ namespace Assets.Project.Code.Scripts.Map.Help
                     && _Location is not null
                     && value is not null)
                 {
-                    if (_Location.AreEqual(value))
+                    if (!_Location.AreEqual(value))
                     {
-                        MapGenerationScript.MapNavigation.StaticObstacles[_Location] = false;
-                        _Location = value;
-                        MapGenerationScript.MapNavigation.StaticObstacles[_Location] = true;
+                        MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
+                        {
+                            obstacles.Release(_Location, _ObjectAssosiation);
+                            _Location = value;
+                            obstacles.ForceTake(_Location, _ObjectAssosiation);
+                        });
                     }
                 }
             }
         }
 
-        public MapObstacleObjectAssociation(MapGenerationScript mapGenerationScript)
+        public MapObstacleObjectAssociation(MapGenerationScript mapGenerationScript, Object objectAssosioation)
         {
             MapGenerationScript = mapGenerationScript;
+            _ObjectAssosiation = objectAssosioation;
         }
 
         public MapObstacleObjectAssociation(MapGenerationScript mapGenerationScript, MapPoint location)

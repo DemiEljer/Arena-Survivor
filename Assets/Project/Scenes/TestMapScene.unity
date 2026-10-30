@@ -717,7 +717,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.Generators.AgentEnemyGeneratorScript
   DoesGenerateEnemies: 1
-  EnemyCount: 20
+  EnemyCount: 30
 --- !u!114 &1705757700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -735,6 +735,7 @@ MonoBehaviour:
   PathTargetPointAchiveDistance: 0.4
   PathSearchingDepth: -1
   MaxCollisionsCount: 1
+  CollisionResolutionOffset: 0.4
 --- !u!1 &1706359427
 GameObject:
   m_ObjectHideFlags: 0
@@ -899,7 +900,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd9e3502bc4651c40a054f390bd82956, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapGenerationScript
-  GenerationSeed: 0
+  GenerationSeed: 1
 --- !u!114 &1849053992
 MonoBehaviour:
   m_ObjectHideFlags: 0

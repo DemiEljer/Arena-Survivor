@@ -14,5 +14,6 @@ namespace Assets.Project.Code.Scripts.Agents
         public float PathTargetPointAchiveDistance = 0.4f;
         public int PathSearchingDepth = 5;
         public int MaxCollisionsCount = 1;
+        public float CollisionResolutionOffset = 0.4f;
     }
 }

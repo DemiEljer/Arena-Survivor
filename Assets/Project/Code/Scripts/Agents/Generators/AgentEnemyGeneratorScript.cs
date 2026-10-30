@@ -37,8 +37,11 @@ namespace Assets.Project.Code.Scripts.Agents.Generators
                     {
                         var randomMapPoint = new MapPoint(rnd.Next(0, mapHandler.Map.Width), rnd.Next(0, mapHandler.Map.Height));
 
-                        var newEnemyObject = _EnemyFabric.CreateDefaultEnemy(mapHandler.ObjectLocations.GetCellCentralLocation(randomMapPoint));
-                        newEnemyObject.name = "Enemy";
+                        if (!mapHandler.MapNavigation.StaticObstacles[randomMapPoint])
+                        {
+                            var newEnemyObject = _EnemyFabric.CreateDefaultEnemy(mapHandler.ObjectLocations.GetCellCentralLocation(randomMapPoint));
+                            newEnemyObject.name = "Fox";
+                        }
                     }
 
                     for (int enemyIndex = 0; enemyIndex < EnemyCount; enemyIndex++)

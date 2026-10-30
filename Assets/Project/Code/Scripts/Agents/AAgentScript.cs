@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.Project.Code.Scripts.Agents
 {
-    public abstract class AAgentScript : MonoBehaviour
+    public abstract class AAgentScript : MonoBehaviour, IDisposable
     {
         public AgentBaseScript BaseScript { get; private set; }
 
@@ -17,6 +17,8 @@ namespace Assets.Project.Code.Scripts.Agents
 
             if (BaseScript is not null)
             {
+                BaseScript.ObjectHasBeenDisposedEvent += (_) => Dispose();
+
                 _Start();
             }
         }
@@ -32,5 +34,7 @@ namespace Assets.Project.Code.Scripts.Agents
         protected virtual void _Start() { }
 
         protected virtual void _Update() { }
+
+        public abstract void Dispose();
     }
 }

@@ -31,7 +31,7 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
 
         protected override void _Start()
         {
-            _Navigation = new AgentNavigationPathHandler(BaseScript.AgentManagerScript , BaseScript.MapHandlerScript);
+            _Navigation = new AgentNavigationPathHandler(BaseScript.AgentManagerScript , BaseScript.MapHandlerScript, BaseScript);
             _AgentTransformComponent = GetComponent<Transform>();
         }
 
@@ -71,7 +71,7 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
             }
             else
             {
-                var prevTargetPoint = _Navigation.CurrentTargetMapPoint;
+                var prevTargetLocation = _Navigation.CurrentTargetLocation;
 
                 Vector3 direction = (_Navigation.CurrentTargetLocation - _AgentTransformComponent.position);
                 direction.y = 0;
@@ -97,14 +97,14 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
                     return AgentMovementState.Idle;
                 }
 
-                if (!_Navigation.IsCollisionDetected)
+                if (!_Navigation.IsMovementBlocked)
                 {
                     Vector3 movement = (new Vector3(0, 0, 1.0f)) * MovementSpeed * Time.deltaTime;
 
                     _AgentTransformComponent.Translate(movement);
                 }
 
-                if (!_Navigation.CurrentTargetMapPoint.AreEqual(prevTargetPoint))
+                if (Vector3.Distance(prevTargetLocation, _Navigation.CurrentTargetLocation) > 0.1f)
                 {
                     return AgentMovementState.Rotation;
                 }
@@ -136,6 +136,11 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
             {
                 return AgentMovementState.Rotation;
             }
+        }
+
+        public override void Dispose()
+        {
+            _Navigation.Dispose();
         }
     }
 }

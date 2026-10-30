@@ -1,9 +1,13 @@
 ﻿using Assets.Project.Code.Scripts.Map;
 using Assets.Project.Code.Scripts.Map.Help;
+using Assets.Project.Code.Standard.Collections;
+using Assets.Project.Code.Standard.TimeHandlers;
 using MapGenearionLibrary.Base;
 using MapGenearionLibrary.Navigation;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,8 +16,9 @@ using static Assets.Project.Code.Scripts.Agents.Help.AgentNavigationPathHandler;
 
 namespace Assets.Project.Code.Scripts.Agents.Help
 {
-    public class AgentNavigationPathHandler
+    public class AgentNavigationPathHandler : IDisposable
     {
+        public AgentBaseScript BaseScript { get; }
         public AgentManagerScript AgentsManagerScript { get; }
         public MapGenerationScript MapGenerationScript { get; }
 
@@ -25,17 +30,19 @@ namespace Assets.Project.Code.Scripts.Agents.Help
         public Vector3 CurrentTargetLocation { get; private set; }
         public MapPoint CurrentTargetMapPoint { get; private set; }
 
-        public bool IsCollisionDetected { get; private set; }
+        public bool IsCollisionDetected { get; private set; } = false;
+        public bool IsMovementBlocked => _PathHandler is null || _PathHandler.IsMovementBlocked;
         public bool IsNoPath => _PathHandler is null;
 
         private PathHandler _PathHandler { get; set; } = null;
         private MapObstacleObjectAssociation _MapLocationAssociation { get; set; }
 
-        public AgentNavigationPathHandler(AgentManagerScript agentsManager, MapGenerationScript mapGenerationScript)
+        public AgentNavigationPathHandler(AgentManagerScript agentsManager, MapGenerationScript mapGenerationScript, AgentBaseScript baseScript)
         {
+            BaseScript = baseScript;
             AgentsManagerScript = agentsManager;
             MapGenerationScript = mapGenerationScript;
-            _MapLocationAssociation = new MapObstacleObjectAssociation(mapGenerationScript);
+            _MapLocationAssociation = new MapObstacleObjectAssociation(mapGenerationScript, baseScript);
         }
 
         public void SetCurrentLocation(Vector3 currentLocation)
@@ -72,11 +79,11 @@ namespace Assets.Project.Code.Scripts.Agents.Help
             {
                 isTargetMapPointAchived = _PathHandler.Invoke(
                     CurrentMapPoint
-                    , 
+                    ,
                     IsCurrentTargetLocationAchived()
-                    , 
+                    ,
                     IsTargetLocationAchived()
-                    , 
+                    ,
                     IsCollisionDetected);
             }
 
@@ -90,7 +97,7 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                 }
                 else
                 {
-                    CurrentTargetLocation = MapGenerationScript.ObjectLocations.GetCellCentralLocation(CurrentTargetMapPoint);
+                    CurrentTargetLocation = MapGenerationScript.ObjectLocations.GetCellOffsetLocation(CurrentTargetMapPoint, _PathHandler.NextPointCorrection, AgentsManagerScript.Params.CollisionResolutionOffset);
                 }
             }
             else
@@ -111,13 +118,23 @@ namespace Assets.Project.Code.Scripts.Agents.Help
             var newPath = MapGenerationScript.MapNavigation.NavigationGraph.FindPathWave(CurrentMapPoint, TargetMapPoint, AgentsManagerScript.Params.PathSearchingDepth);
             //MapGenerationScript.MapNavigation.NavigationGraph.GetPathes(CurrentMapPoint, TargetMapPoint, AgentsManagerScript.Params.PathSearchingDepth).FirstOrDefault();
 
+            if (_PathHandler is not null)
+            {
+                _PathHandler.Dispose();
+            }
+
             if (newPath is not null)
             {
-                _PathHandler = new PathHandler(MapGenerationScript, AgentsManagerScript, newPath);
+                _PathHandler = new PathHandler(MapGenerationScript, AgentsManagerScript, newPath, BaseScript);
                 // Событие повторного построения пути
                 _PathHandler.NavigationPathHasBeenCorruptedEvent += _CreateNewPath;
                 // Событие полной блокировки пути
-                _PathHandler.NavigationPathHasBeenBlockedEvent += () => _PathHandler = null;
+                _PathHandler.NavigationPathHasBeenBlockedEvent += () =>
+                {
+                    _PathHandler.Dispose();
+
+                    _PathHandler = null;
+                };
             }
             else
             {
@@ -125,189 +142,602 @@ namespace Assets.Project.Code.Scripts.Agents.Help
             }
         }
 
+        public void Dispose()
+        {
+            _PathHandler?.Dispose();
+        }
+
+        public class PathBlockingSequenceElement
+        {
+            public PathHandler Agent { get; }
+
+            public MapPoint RequestedPoint { get; }
+
+            public PathBlockingSequenceElement RequestingPointOwner { get; set; } = null;
+            public PathBlockingSequenceElement RequestedPointOwner { get; set; } = null;
+
+            public PathBlockingSequenceElement(PathHandler agent, MapPoint requestedPoint)
+            {
+                Agent = agent;
+                RequestedPoint = requestedPoint;
+            }
+        }
+
+        public class PathBlockingSolverHandler
+        {
+            private ConcurrentDictionary<PathHandler, PathBlockingSequenceElement> _Agents { get; } = new();
+
+            public void AppendAgent(PathHandler agent, MapPoint requestedPoint)
+            {
+                lock (this)
+                {
+                    if (!_Agents.ContainsKey(agent))
+                    {
+                        var newElement = new PathBlockingSequenceElement(agent, requestedPoint);
+
+                        _Agents.AddOrUpdate(agent, (_) => newElement, (_, _) => newElement);
+                    }
+                }
+            }
+
+            public void RemoveAgent(PathHandler agent)
+            {
+                lock (this)
+                {
+                    if (_Agents.ContainsKey(agent))
+                    {
+                        PathBlockingSequenceElement element;
+
+                        _Agents.Remove(agent, out element);
+
+                        if (element.RequestingPointOwner is not null)
+                        {
+                            element.RequestingPointOwner.RequestedPointOwner = null;
+                        }
+                    }
+                }
+            }
+
+            public void SetRequestingSequenceConnection(PathHandler agent, PathHandler requestedPointAgent)
+            {
+                lock (this)
+                {
+                    PathBlockingSequenceElement elementFrom = null;
+                    PathBlockingSequenceElement elementTo = null;
+
+                    if (_Agents.ContainsKey(agent))
+                    {
+                        elementFrom = _Agents.GetValueOrDefault(agent);
+                    }
+
+                    if (_Agents.ContainsKey(requestedPointAgent))
+                    {
+                        elementTo = _Agents.GetValueOrDefault(requestedPointAgent);
+                    }
+
+                    if (elementFrom is not null
+                        && elementTo is not null)
+                    {
+                        elementTo.RequestingPointOwner = elementFrom;
+                        elementFrom.RequestedPointOwner = elementTo;
+                    }
+                }
+            }
+
+            public bool TryToSolvePathBlocking(PathHandler agent)
+            {
+                lock (this)
+                {
+                    PathBlockingSequenceElement elementFrom = null;
+                    PathBlockingSequenceElement currentElement = null;
+                    HashSet<PathBlockingSequenceElement> passedElements = new();
+
+                    if (_Agents.ContainsKey(agent))
+                    {
+                        elementFrom = _Agents.GetValueOrDefault(agent);
+                        currentElement = elementFrom.RequestedPointOwner;
+                    }
+
+                    int iterationIndex = 0;
+
+                    while (iterationIndex < _Agents.Count && currentElement is not null)
+                    {
+                        if (passedElements.Contains(currentElement))
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            passedElements.Add(currentElement);
+                        }
+
+                        if (currentElement == elementFrom)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            if (currentElement.Agent.IsPathBlocked)
+                            {
+                                currentElement = currentElement.RequestedPointOwner;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+
+                        iterationIndex++;
+                    }
+
+                    return false;
+                }
+            }
+        }
+
         public class PathHandler
         {
+            private static CollectionMapper<object, PathHandler> _Mapper { get; } = new();
+            private static ConcurrentDictionary<MapGenerationScript, PathBlockingSolverHandler> _PathBlockSolvers { get; } = new();
+
+            public enum PathHandlerState
+            {
+                PathSwitching = 0,
+                RoomMoving = 1,
+                RoomTransfer = 2,
+                PathIsBlocked = 3,
+                CollisionIsDetected = 4,
+                PathDestinationIsAchived = 5
+            }
+
+            public AgentBaseScript BaseScript { get; }
             public MapGenerationScript MapGenerationScript { get; }
             public AgentManagerScript AgentManagerScript { get; }
             public MapNavigationGraphPath Path { get; }
 
-            public MapPoint NextPoint
-            {
-                get
-                {
-                    if (_RandomRoomPoint is not null)
-                    {
-                        return _RandomRoomPoint;
-                    }
-                    else if (_CurrentHelpRoomPoints is null)
-                    {
-                        return Path.PointsSequence[_PathPointIndex].Point;
-                    }
-                    else
-                    {
-                        return _CurrentHelpRoomPoints[_HelpRoomPathIndex];
-                    }
-                }
-            }
-
-            public MapRoom CurrentRoom => _PathPointIndex > 0 ? Path.PointsSequence[_PathPointIndex - 1].Room : NextRoom;
-            public MapRoom NextRoom => Path.PointsSequence[_PathPointIndex].Room;
+            public PathHandlerState State { get; private set; } = PathHandlerState.PathSwitching;
+            public bool IsMovementBlocked { get; private set; }
+            public MapPoint NextPoint { get; private set; }
+            public MapObjectOrientationEnum NextPointCorrection { get; private set; } = MapObjectOrientationEnum.Center;
+            public bool IsPathBlocked { get; private set; } = false;
 
             public event Action NavigationPathHasBeenCorruptedEvent;
             public event Action NavigationPathHasBeenBlockedEvent;
 
-            private int _PathPointIndex = 0;
-            private int _HelpRoomPathIndex = 0;
+            private MapPoint _TheoreticalTargetPoint { get; set; }
+            private ArrayIterator<(MapPoint Point, MapRoom Room)> _PathPoints { get; set; }
+            private ArrayIterator<MapPoint> _CurrentRoomPath { get; set; } = null;
+            private LinkedList<MapPoint> _PathPointsTrace { get; } = new();
+            private MapPoint _PreviousPoint { get; set; }
+            private BaseTimer _PathReleasingTimer { get; } = new();
+            private BaseTimer _CollisionDisapearTimer { get; } = new();
 
-            private MapPoint[] _CurrentHelpRoomPoints { get; set; } = null;
-            private MapPoint _RandomRoomPoint { get; set; } = null;
-            private bool _PrevCollisionStatus { get; set; } = false;
-            private MapPoint _PrevPoint
+            public PathHandler(MapGenerationScript mapGenerationScript, AgentManagerScript agentManagerScript, MapNavigationGraphPath path, AgentBaseScript baseScript)
             {
-                get
-                {
-                    if (_PathTrace.Count == 0)
-                    {
-                        return new MapPoint();
-                    }
-                    else if (_PathTrace.Count == 1)
-                    {
-                        return _PathTrace[0];
-                    }
-                    else
-                    {
-                        return _PathTrace[_PathTrace.Count - 2];
-                    }
-                }
-            }
-            private MapPoint _LastPoint
-            {
-                get
-                {
-                    if (_PathTrace.Count == 0)
-                    {
-                        return new MapPoint();
-                    }
-                    else
-                    {
-                        return _PathTrace.Last();
-                    }
-                }
-            }
-            private List<MapPoint> _PathTrace { get; } = new();
-
-            public PathHandler(MapGenerationScript mapGenerationScript, AgentManagerScript agentManagerScript, MapNavigationGraphPath path)
-            {
+                BaseScript = baseScript;
                 MapGenerationScript = mapGenerationScript;
                 AgentManagerScript = agentManagerScript;
                 Path = path;
+
+                _PathPoints = new(Path.PointsSequence);
+
+                _Mapper.Add(BaseScript, this);
+                if (!_PathBlockSolvers.ContainsKey(mapGenerationScript))
+                {
+                    var newSolver = new PathBlockingSolverHandler();
+
+                    _PathBlockSolvers.AddOrUpdate(mapGenerationScript, (_) => newSolver, (_, _) => newSolver);
+                }
             }
 
             public bool Invoke(MapPoint currentPoint, bool isCurrentTargetPointAchived, bool isFinalTargetPointAchived, bool isCollisionDetected)
             {
-                if (!CurrentRoom.DoesRoomContainsPoint(currentPoint) 
-                    && !NextRoom.DoesRoomContainsPoint(currentPoint))
+                if (_PathPointsTrace.Count == 0
+                    || !_PathPointsTrace.Last.Value.AreEqual(currentPoint))
+                {
+                    if (_PathPointsTrace.Count > 0)
+                    {
+                        MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
+                        {
+                            obstacles.Release(_PathPointsTrace.Last.Value, BaseScript);
+                        });
+
+                        _PreviousPoint = _PathPointsTrace.Last.Value;
+                    }
+                    else
+                    {
+                        _PreviousPoint = currentPoint;
+                        _TheoreticalTargetPoint = currentPoint;
+                    }
+
+                    _PathPointsTrace.AddLast(currentPoint);
+
+                    NextPointCorrection = MapObjectOrientationEnum.Center;
+                }
+
+                if (isCollisionDetected && State != PathHandlerState.CollisionIsDetected)
+                {
+                    _CollisionDisapearTimer.Update(0.5f);
+                    State = PathHandlerState.CollisionIsDetected;
+
+                    _HandleCollisionCorrection(currentPoint);
+
+                    MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
+                    {
+                        _ReleaseNextPathPoint(obstacles, currentPoint);
+                    });
+                }
+
+                if (!_PathPoints.Current.Room.DoesRoomContainsPoint(currentPoint)
+                    && !_PathPoints.Next.Room.DoesRoomContainsPoint(currentPoint))
                 {
                     NavigationPathHasBeenCorruptedEvent?.Invoke();
 
                     return false;
                 }
 
-                if (isCollisionDetected && !_PrevCollisionStatus)
-                {
-                    _RandomRoomPoint = null;
-                    _CurrentHelpRoomPoints = null;
+                var currentRoom = MapGenerationScript.MapNavigation.GetRoom(currentPoint);
+                bool previousePathBlockStatus = IsPathBlocked;
 
-                    if (_FindRoomHelpPath()) {}
-                    else if (_FindRandomPoint())
-                    {
-                        if (_PathTrace.Where(tracePoint => tracePoint.AreEqual(_RandomRoomPoint)).Count() > AgentManagerScript.Params.MaxCollisionsCount)
+                switch (State)
+                {
+                    case PathHandlerState.PathSwitching:
+
+                        MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
                         {
-                            NavigationPathHasBeenBlockedEvent?.Invoke();
+                            _ReleaseNextPathPoint(obstacles, currentPoint);
+                        });
+
+                        if (_CurrentRoomPath is not null)
+                        {
+                            MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
+                            {
+                                foreach (var point in _CurrentRoomPath.TakeLeft())
+                                {
+                                    if (!point.AreEqual(currentPoint))
+                                    {
+                                        obstacles.Release(point, BaseScript);
+                                    }
+                                }
+                            });
+
+                            _CurrentRoomPath = null;
                         }
-                    }
-                    else
-                    {
-                        NavigationPathHasBeenBlockedEvent?.Invoke();
-                    }
-                }
-                _PrevCollisionStatus = isCollisionDetected;
 
-                // Алгоритм разрешения передвижения
-                if ((isCurrentTargetPointAchived && !NextPoint.AreEqual(Path.PointTo))
-                    || (isFinalTargetPointAchived && NextPoint.AreEqual(Path.PointTo)))
-                {
-                    if (_RandomRoomPoint is not null)
-                    {
-                        _RandomRoomPoint = null;
-                    }
-                    else if (_CurrentHelpRoomPoints is not null)
-                    {
-                        if (_HelpRoomPathIndex < (_CurrentHelpRoomPoints.Length - 1))
+                        // Переход на следующую целевую точку
+                        if (currentPoint.AreEqual(_PathPoints.Next.Point))
                         {
-                            _HelpRoomPathIndex++;
+                            _PathPoints.MoveNext();
+                        }
+
+                        if (currentPoint.AreEqual(_PathPoints.Last.Point))
+                        {
+                            State = PathHandlerState.PathDestinationIsAchived;
+                        }
+                        // Находимся в комнате
+                        else if (currentRoom.AreEqual(_PathPoints.Current.Room)
+                                 && currentRoom.AreEqual(_PathPoints.Next.Room))
+                        {
+                            bool corruptionFlag = false;
+
+                            MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
+                            {
+                                var currentRoomPath = MapGenerationScript.MapNavigation.NavigationGraph.FindPathInRoomDynamic(currentPoint, _PathPoints.Next.Point, BaseScript);
+
+                                if (currentRoomPath.DynamicPath.Length <= 1)
+                                {
+                                    if (currentRoomPath.ActualPath.Length >= 2)
+                                    {
+                                        _TheoreticalTargetPoint = currentRoomPath.ActualPath[1];
+
+                                        State = _HandleBlockReasons(obstacles, currentRoomPath.ActualPath[1], PathHandlerState.RoomMoving);
+
+                                        if (State == PathHandlerState.RoomMoving)
+                                        {
+                                            _CurrentRoomPath = new(new MapPoint[]
+                                            {
+                                                currentRoomPath.ActualPath[0]
+                                                ,
+                                                currentRoomPath.ActualPath[1]
+                                            });
+
+                                            _ReserveNextPathPoint(obstacles, _CurrentRoomPath.Next);
+                                        }
+                                        else
+                                        {
+                                            _CurrentRoomPath = null;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        NavigationPathHasBeenCorruptedEvent?.Invoke();
+
+                                        corruptionFlag = true;
+
+                                        return;
+                                    }
+                                }
+                                else
+                                {
+                                    _CurrentRoomPath = new(currentRoomPath.DynamicPath);
+
+                                    _ReserveNextPathPoint(obstacles, _CurrentRoomPath.Next);
+
+                                    State = PathHandlerState.RoomMoving;
+                                }
+                            });
+
+                            if (corruptionFlag)
+                            {
+                                return false;
+                            }
                         }
                         else
                         {
-                            _CurrentHelpRoomPoints = null;
+                            _HandleTransferReasons();
                         }
-                    }
-                    else
-                    {
-                        if (_PathPointIndex < (Path.PointsSequence.Length - 1))
+                        break;
+
+                    case PathHandlerState.RoomMoving:
+                        if (isCurrentTargetPointAchived)
                         {
-                            _PathPointIndex++;
+                            MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
+                            {
+                                if (!_CurrentRoomPath.MoveNext())
+                                {
+                                    State = PathHandlerState.PathSwitching;
+                                }
+                                else
+                                {
+                                    _ReserveNextPathPoint(obstacles, _CurrentRoomPath.Next);
+                                }
+                            });
                         }
-                        else
+                        else if (_CurrentRoomPath.FirstOrDefault(point => point.AreEqual(currentPoint)) == null)
                         {
-                            return true;
+                            State = PathHandlerState.PathSwitching;
                         }
-                    }
+                        break;
+
+                    case PathHandlerState.RoomTransfer:
+                        if (isCurrentTargetPointAchived)
+                        {
+                            _PathPoints.MoveNext();
+                            State = PathHandlerState.PathSwitching;
+                        }
+                        else if (currentRoom.AreEqual(_PathPoints.Next.Room)
+                                 && !currentPoint.AreEqual(_PathPoints.Next.Point))
+                        {
+                            _PathPoints.MoveNext();
+                            State = PathHandlerState.PathSwitching;
+                        }
+                        break;
+
+                    case PathHandlerState.PathIsBlocked:
+                        if (_PathReleasingTimer.IsTimeEllapsed)
+                        {
+                            State = PathHandlerState.PathSwitching;
+                        }
+                        break;
+
+                    case PathHandlerState.CollisionIsDetected:
+                        if (_CollisionDisapearTimer.IsTimeEllapsed
+                            || isCurrentTargetPointAchived)
+                        {
+                            State = PathHandlerState.PathSwitching;
+                        }
+                        break;
+
+                    case PathHandlerState.PathDestinationIsAchived:
+
+                        break;
                 }
 
-                if (!_LastPoint.AreEqual(currentPoint))
+                switch (State)
                 {
-                    _PathTrace.Add(currentPoint);
+                    case PathHandlerState.PathSwitching:
+                        break;
+
+                    case PathHandlerState.RoomMoving:
+                        NextPoint = _CurrentRoomPath.Next;
+                        IsPathBlocked = false;
+                        break;
+
+                    case PathHandlerState.RoomTransfer:
+                        NextPoint = _PathPoints.Next.Point;
+                        IsPathBlocked = false;
+                        break;
+
+                    case PathHandlerState.PathIsBlocked:
+                        IsPathBlocked = true;
+                        break;
+
+                    case PathHandlerState.CollisionIsDetected:
+                        break;
+
+                    case PathHandlerState.PathDestinationIsAchived:
+                        NextPoint = _PathPoints.Last.Point;
+                        IsPathBlocked = false;
+                        break;
                 }
 
-                return false;
+                if (NextPoint is null)
+                {
+                    NextPoint = currentPoint;
+                }
+
+                IsMovementBlocked = State != PathHandlerState.RoomMoving
+                    && State != PathHandlerState.RoomTransfer
+                    && State != PathHandlerState.CollisionIsDetected;
+
+                _PathReleasingTimer.Invoke();
+                _CollisionDisapearTimer.Invoke();
+
+                if (previousePathBlockStatus
+                    && !IsPathBlocked)
+                {
+                    _PathBlockSolvers[MapGenerationScript].RemoveAgent(this);
+                }
+
+                return State == PathHandlerState.PathDestinationIsAchived;
             }
 
-            private bool _FindRoomHelpPath()
+            private void _HandleCollisionCorrection(MapPoint currentPoint)
             {
-                _HelpRoomPathIndex = 0;
+                MapPoint movementDirection;
 
-                var inRoomNavigationPath = MapGenerationScript.MapNavigation.NavigationGraph.FindPathInRoom(_PrevPoint, NextPoint);
-
-                if (inRoomNavigationPath.Length > 0)
+                if (!NextPoint.AreEqual(currentPoint))
                 {
-                    _CurrentHelpRoomPoints = inRoomNavigationPath;
+                    movementDirection = NextPoint - currentPoint;
+                }
+                else if (!_TheoreticalTargetPoint.AreEqual(currentPoint))
+                {
+                    movementDirection = _TheoreticalTargetPoint - currentPoint;
+                }
+                else if (!_PreviousPoint.AreEqual(currentPoint))
+                {
+                    movementDirection = currentPoint - _PreviousPoint;
                 }
                 else
                 {
-                    _CurrentHelpRoomPoints = null;
+                    movementDirection = _PathPoints.Next.Point - currentPoint;
                 }
 
-                return _CurrentHelpRoomPoints is not null;
-            }
-
-            private bool _FindRandomPoint()
-            {
-                _RandomRoomPoint = null;
-
-                var randomPoints = MapGenerationScript.MapNavigation.NavigationGraph.FindDirectionInRoom(_PrevPoint, NextPoint);
-
-                if (randomPoints.Length > 0)
+                if (NextPointCorrection == MapObjectOrientationEnum.Center)
                 {
-                    _RandomRoomPoint = randomPoints[MapGenerationScript.Rnd.Next(0, randomPoints.Length)];
-
-                    if (!NextRoom.AreEqual(CurrentRoom))
+                    if (movementDirection.X > 0)
                     {
-                        _PathPointIndex = Math.Max(0, _PathPointIndex - 1);
+                        if (movementDirection.Y > 0)
+                        {
+                            NextPointCorrection = MapObjectOrientationEnum.BottomRight;
+                        }
+                        if (movementDirection.Y < 0)
+                        {
+                            NextPointCorrection = MapObjectOrientationEnum.BottomLeft;
+                        }
+                        if (movementDirection.Y == 0)
+                        {
+                            NextPointCorrection = MapObjectOrientationEnum.Bottom;
+                        }
+                    }
+                    else if (movementDirection.X < 0)
+                    {
+                        if (movementDirection.Y > 0)
+                        {
+                            NextPointCorrection = MapObjectOrientationEnum.TopLeft;
+                        }
+                        if (movementDirection.Y < 0)
+                        {
+                            NextPointCorrection = MapObjectOrientationEnum.TopRight;
+                        }
+                        if (movementDirection.Y == 0)
+                        {
+                            NextPointCorrection = MapObjectOrientationEnum.Top;
+                        }
+                    }
+                    else if (movementDirection.X == 0)
+                    {
+                        if (movementDirection.Y > 0)
+                        {
+                            NextPointCorrection = MapObjectOrientationEnum.Left;
+                        }
+                        if (movementDirection.Y < 0)
+                        {
+                            NextPointCorrection = MapObjectOrientationEnum.Right;
+                        }
+                        if (movementDirection.Y == 0)
+                        {
+                            NextPointCorrection = MapObjectOrientationEnum.Center;
+                        }
                     }
                 }
+                else
+                {
+                    NextPointCorrection = (MapObjectOrientationEnum)(((int)NextPointCorrection + MapGenerationScript.Rnd.Next(3)) % 9);
+                }
+            }
 
-                return _RandomRoomPoint is not null;
+            private void _HandleTransferReasons()
+            {
+                MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
+                {
+                    if (obstacles[_PathPoints.Next.Point, BaseScript])
+                    {
+                        _ReserveNextPathPoint(obstacles, _PathPoints.Next.Point);
+
+                        State = PathHandlerState.RoomTransfer;
+                    }
+                    else
+                    {
+                        _TheoreticalTargetPoint = _PathPoints.Next.Point;
+
+                        State = _HandleBlockReasons(obstacles, _PathPoints.Next.Point, PathHandlerState.RoomTransfer);
+
+                        if (State == PathHandlerState.RoomTransfer)
+                        {
+                            _ReserveNextPathPoint(obstacles, _PathPoints.Next.Point);
+                        }
+                    }
+                });
+            }
+
+            private PathHandlerState _HandleBlockReasons(MapDynamicObstaclesHandler obstacles, MapPoint targetPoint, PathHandlerState returnState)
+            {
+                _TheoreticalTargetPoint = targetPoint;
+                _PathBlockSolvers[MapGenerationScript].AppendAgent(this, _TheoreticalTargetPoint);
+
+                var anotherOwner = _Mapper.Get(obstacles.GetCellObstacleOwner(targetPoint));
+
+                if (anotherOwner is not null)
+                {
+                    _PathBlockSolvers[MapGenerationScript].SetRequestingSequenceConnection(this, anotherOwner);
+
+                    if (_PathBlockSolvers[MapGenerationScript].TryToSolvePathBlocking(this))
+                    {
+                        return returnState;
+                    }
+                    else
+                    {
+                        _PathReleasingTimer.Update(0.3f);
+                        return PathHandlerState.PathIsBlocked;
+                    }
+                }
+                else
+                {
+                    _PathReleasingTimer.Update(0.3f);
+                    return PathHandlerState.PathIsBlocked;
+                }
+            }
+
+            private void _ReserveNextPathPoint(MapDynamicObstaclesHandler obstacles, MapPoint point)
+            {
+                _TheoreticalTargetPoint = point;
+
+                obstacles.ForceTake(_TheoreticalTargetPoint, BaseScript);
+            }
+
+            private void _ReleaseNextPathPoint(MapDynamicObstaclesHandler obstacles, MapPoint currentPoint)
+            {
+                if (!_TheoreticalTargetPoint.AreEqual(currentPoint))
+                {
+                    obstacles.Release(_TheoreticalTargetPoint, BaseScript);
+                }
+            }
+
+            public void Dispose()
+            {
+                MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
+                {
+                    foreach (var point in _PathPointsTrace.Take(_PathPointsTrace.Count - 1))
+                    {
+                        obstacles.Release(point, BaseScript);
+                    }
+
+                    _ReleaseNextPathPoint(obstacles, new MapPoint(-1, -1));
+                });
+
+                _Mapper.Remove(BaseScript);
+                _PathBlockSolvers[MapGenerationScript].RemoveAgent(this);
             }
         }
     }
