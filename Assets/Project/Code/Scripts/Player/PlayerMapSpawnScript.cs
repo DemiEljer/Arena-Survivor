@@ -42,7 +42,7 @@ public class PlayerMapSpawnScript : MonoBehaviour
     {
         if (_PlayerTransformComponent is not null)
         {
-            _MapLocationAssociation = new MapObstacleObjectAssociation(_MapGenerationScript, this);
+            _MapLocationAssociation = new MapObstacleObjectAssociation(_MapGenerationScript, this, false);
 
             _PlayerTransformComponent.position = mapHandlerScript.GetSpawnPoint();
         }

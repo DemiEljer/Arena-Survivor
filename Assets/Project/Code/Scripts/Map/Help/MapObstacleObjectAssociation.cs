@@ -11,6 +11,8 @@ namespace Assets.Project.Code.Scripts.Map.Help
     {
         public MapGenerationScript MapGenerationScript { get; }
 
+        public bool IsForceLocationTaking { get; set; } = true;
+
         private MapPoint _Location { get; set; } = new MapPoint(-1, -1);
 
         private Object _ObjectAssosiation { get; }
@@ -30,23 +32,30 @@ namespace Assets.Project.Code.Scripts.Map.Help
                         {
                             obstacles.Release(_Location, _ObjectAssosiation);
                             _Location = value;
-                            obstacles.ForceTake(_Location, _ObjectAssosiation);
                         });
                     }
                 }
+
+                MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
+                {
+                    if (IsForceLocationTaking)
+                    {
+                        obstacles.ForceTake(_Location, _ObjectAssosiation);
+                    }
+                    else
+                    {
+                        obstacles.SetCellObstacle(_Location, _ObjectAssosiation);
+                    }
+                });
+
             }
         }
 
-        public MapObstacleObjectAssociation(MapGenerationScript mapGenerationScript, Object objectAssosioation)
+        public MapObstacleObjectAssociation(MapGenerationScript mapGenerationScript, Object objectAssosioation, bool forceFlag = true)
         {
             MapGenerationScript = mapGenerationScript;
             _ObjectAssosiation = objectAssosioation;
-        }
-
-        public MapObstacleObjectAssociation(MapGenerationScript mapGenerationScript, MapPoint location)
-        {
-            MapGenerationScript = mapGenerationScript;
-            Location = location;
+            IsForceLocationTaking = forceFlag;
         }
     }
 }

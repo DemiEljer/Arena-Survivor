@@ -287,7 +287,8 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                 RoomTransfer = 2,
                 PathIsBlocked = 3,
                 CollisionIsDetected = 4,
-                PathDestinationIsAchived = 5
+                PathDestinationIsAchived = 5,
+                PathIsFinished = 6
             }
 
             public AgentBaseScript BaseScript { get; }
@@ -297,7 +298,9 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
             public PathHandlerState State { get; private set; } = PathHandlerState.PathSwitching;
             public bool IsMovementBlocked { get; private set; }
+            public bool IsTargetRoomAchived { get; private set; } = false;
             public MapPoint NextPoint { get; private set; }
+            public MapRoom CurrentRoom { get; private set; }
             public MapObjectOrientationEnum NextPointCorrection { get; private set; } = MapObjectOrientationEnum.Center;
             public bool IsPathBlocked { get; private set; } = false;
 
@@ -376,8 +379,21 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                     return false;
                 }
 
-                var currentRoom = MapGenerationScript.MapNavigation.GetRoom(currentPoint);
+                CurrentRoom = MapGenerationScript.MapNavigation.GetRoom(currentPoint);
+                IsTargetRoomAchived = CurrentRoom.AreEqual(_PathPoints.Last.Room);
+
                 bool previousePathBlockStatus = IsPathBlocked;
+
+                bool isNextPointAchived = NextPoint is null ? isCurrentTargetPointAchived :
+                    NextPoint.AreEqual(_PathPoints.Last.Point) ? isFinalTargetPointAchived : isCurrentTargetPointAchived;
+
+                if (_PathPoints.Current.Room.AreEqual(_PathPoints.Next.Room)
+                    && !_PathPoints.Current.Room.AreEqual(CurrentRoom))
+                {
+                    NavigationPathHasBeenCorruptedEvent?.Invoke();
+
+                    return false;
+                }
 
                 switch (State)
                 {
@@ -415,8 +431,8 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                             State = PathHandlerState.PathDestinationIsAchived;
                         }
                         // Находимся в комнате
-                        else if (currentRoom.AreEqual(_PathPoints.Current.Room)
-                                 && currentRoom.AreEqual(_PathPoints.Next.Room))
+                        else if (CurrentRoom.AreEqual(_PathPoints.Current.Room)
+                                 && CurrentRoom.AreEqual(_PathPoints.Next.Room))
                         {
                             bool corruptionFlag = false;
 
@@ -479,7 +495,7 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                         break;
 
                     case PathHandlerState.RoomMoving:
-                        if (isCurrentTargetPointAchived)
+                        if (isNextPointAchived)
                         {
                             MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
                             {
@@ -493,19 +509,20 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                                 }
                             });
                         }
-                        else if (_CurrentRoomPath.FirstOrDefault(point => point.AreEqual(currentPoint)) == null)
+                        else if (_CurrentRoomPath.FirstOrDefault(point => point.AreEqual(currentPoint)) == null
+                                 || (!currentPoint.AreEqual(_CurrentRoomPath.Current) && !currentPoint.AreEqual(_CurrentRoomPath.Next)))
                         {
                             State = PathHandlerState.PathSwitching;
                         }
                         break;
 
                     case PathHandlerState.RoomTransfer:
-                        if (isCurrentTargetPointAchived)
+                        if (isNextPointAchived)
                         {
                             _PathPoints.MoveNext();
                             State = PathHandlerState.PathSwitching;
                         }
-                        else if (currentRoom.AreEqual(_PathPoints.Next.Room)
+                        else if (CurrentRoom.AreEqual(_PathPoints.Next.Room)
                                  && !currentPoint.AreEqual(_PathPoints.Next.Point))
                         {
                             _PathPoints.MoveNext();
@@ -522,14 +539,20 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
                     case PathHandlerState.CollisionIsDetected:
                         if (_CollisionDisapearTimer.IsTimeEllapsed
-                            || isCurrentTargetPointAchived)
+                            || isNextPointAchived)
                         {
                             State = PathHandlerState.PathSwitching;
                         }
                         break;
 
                     case PathHandlerState.PathDestinationIsAchived:
+                        if (isNextPointAchived)
+                        {
+                            State = PathHandlerState.PathIsFinished;
+                        }
+                        break;
 
+                    case PathHandlerState.PathIsFinished:
                         break;
                 }
 
@@ -555,6 +578,7 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                     case PathHandlerState.CollisionIsDetected:
                         break;
 
+                    case PathHandlerState.PathIsFinished:
                     case PathHandlerState.PathDestinationIsAchived:
                         NextPoint = _PathPoints.Last.Point;
                         IsPathBlocked = false;
@@ -566,9 +590,9 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                     NextPoint = currentPoint;
                 }
 
-                IsMovementBlocked = State != PathHandlerState.RoomMoving
-                    && State != PathHandlerState.RoomTransfer
-                    && State != PathHandlerState.CollisionIsDetected;
+                IsMovementBlocked = State == PathHandlerState.PathSwitching
+                    || State == PathHandlerState.PathIsBlocked
+                    || State == PathHandlerState.PathIsFinished;
 
                 _PathReleasingTimer.Invoke();
                 _CollisionDisapearTimer.Invoke();
@@ -579,7 +603,7 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                     _PathBlockSolvers[MapGenerationScript].RemoveAgent(this);
                 }
 
-                return State == PathHandlerState.PathDestinationIsAchived;
+                return State == PathHandlerState.PathDestinationIsAchived || State == PathHandlerState.PathIsFinished;
             }
 
             private void _HandleCollisionCorrection(MapPoint currentPoint)
@@ -718,7 +742,8 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
             private void _ReleaseNextPathPoint(MapDynamicObstaclesHandler obstacles, MapPoint currentPoint)
             {
-                if (!_TheoreticalTargetPoint.AreEqual(currentPoint))
+                if (_TheoreticalTargetPoint is not null && 
+                    !_TheoreticalTargetPoint.AreEqual(currentPoint))
                 {
                     obstacles.Release(_TheoreticalTargetPoint, BaseScript);
                 }

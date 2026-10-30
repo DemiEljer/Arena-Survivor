@@ -717,7 +717,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.Generators.AgentEnemyGeneratorScript
   DoesGenerateEnemies: 1
-  EnemyCount: 30
+  EnemyCount: 50
 --- !u!114 &1705757700
 MonoBehaviour:
   m_ObjectHideFlags: 0

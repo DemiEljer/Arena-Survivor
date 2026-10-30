@@ -128,7 +128,8 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
                 targetRotation,
                 RotationSpeed * Time.deltaTime);
 
-            if (Quaternion.Angle(_AgentTransformComponent.localRotation, targetRotation) < 5.0f)
+            if (Quaternion.Angle(_AgentTransformComponent.localRotation, targetRotation) < 5.0f
+                || Vector3.Distance(_Navigation.CurrentTargetLocation, _AgentTransformComponent.position) < BaseScript.AgentManagerScript.Params.PathInternalPointAchiveDistance)
             {
                 return AgentMovementState.Moving;
             }

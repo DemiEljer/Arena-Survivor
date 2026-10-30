@@ -40,7 +40,10 @@ namespace Assets.Project.Code.Scripts.Agents.Generators
                         if (!mapHandler.MapNavigation.StaticObstacles[randomMapPoint])
                         {
                             var newEnemyObject = _EnemyFabric.CreateDefaultEnemy(mapHandler.ObjectLocations.GetCellCentralLocation(randomMapPoint));
-                            newEnemyObject.name = "Fox";
+
+                            var baseScript = newEnemyObject.GetComponent<AgentBaseScript>();
+
+                            newEnemyObject.name = $"Fox_{baseScript.ObjectIndex}";
                         }
                     }
 
