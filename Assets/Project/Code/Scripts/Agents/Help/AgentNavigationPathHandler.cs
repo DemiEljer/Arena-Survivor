@@ -358,7 +358,10 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                     NextPointCorrection = MapObjectOrientationEnum.Center;
                 }
 
-                if (isCollisionDetected && State != PathHandlerState.CollisionIsDetected)
+                if (isCollisionDetected 
+                    && State != PathHandlerState.CollisionIsDetected
+                    && State != PathHandlerState.PathDestinationIsAchived
+                    && State != PathHandlerState.PathIsFinished)
                 {
                     _CollisionDisapearTimer.Update(0.5f);
                     State = PathHandlerState.CollisionIsDetected;
@@ -430,6 +433,16 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                         {
                             State = PathHandlerState.PathDestinationIsAchived;
                         }
+                        else if (_TheoreticalTargetPoint is not null
+                                 && _TheoreticalTargetPoint.AreEqual(_PathPoints.Last.Point))
+                        {
+                            MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
+                            {
+                                _ReserveNextPathPoint(obstacles, _TheoreticalTargetPoint);
+                            });
+
+                            State = PathHandlerState.PathDestinationIsAchived;
+                        }
                         // Находимся в комнате
                         else if (CurrentRoom.AreEqual(_PathPoints.Current.Room)
                                  && CurrentRoom.AreEqual(_PathPoints.Next.Room))
@@ -495,7 +508,11 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                         break;
 
                     case PathHandlerState.RoomMoving:
-                        if (isNextPointAchived)
+                        if (NextPoint.AreEqual(_PathPoints.Last.Point))
+                        {
+                            State = PathHandlerState.PathSwitching;
+                        }
+                        else if (isNextPointAchived)
                         {
                             MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
                             {
@@ -517,7 +534,11 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                         break;
 
                     case PathHandlerState.RoomTransfer:
-                        if (isNextPointAchived)
+                        if (NextPoint.AreEqual(_PathPoints.Last.Point))
+                        {
+                            State = PathHandlerState.PathSwitching;
+                        }
+                        else if (isNextPointAchived)
                         {
                             _PathPoints.MoveNext();
                             State = PathHandlerState.PathSwitching;
@@ -689,7 +710,14 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                     {
                         _ReserveNextPathPoint(obstacles, _PathPoints.Next.Point);
 
-                        State = PathHandlerState.RoomTransfer;
+                        if (_PathPoints.Next.Point.AreEqual(_PathPoints.Last.Point))
+                        {
+                            State = PathHandlerState.PathDestinationIsAchived;
+                        }
+                        else
+                        {
+                            State = PathHandlerState.RoomTransfer;
+                        }
                     }
                     else
                     {
@@ -700,6 +728,11 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                         if (State == PathHandlerState.RoomTransfer)
                         {
                             _ReserveNextPathPoint(obstacles, _PathPoints.Next.Point);
+
+                            if (_PathPoints.Next.Point.AreEqual(_PathPoints.Last.Point))
+                            {
+                                State = PathHandlerState.PathDestinationIsAchived;
+                            }
                         }
                     }
                 });

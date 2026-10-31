@@ -21,9 +21,9 @@ namespace Assets.Project.Code.Scripts.Agents.AgentBehaviour
         }
 
         [SerializeField]
-        public float MovementSpeed = 2f;
+        public float MovementSpeed = 6f;
         [SerializeField]
-        public float RotationSpeed = 180f;
+        public float RotationSpeed = 720f;
         public AgentMovementState MovementState { get; private set; } = AgentMovementState.Idle;
 
         private AgentNavigationPathHandler _Navigation { get; set; }

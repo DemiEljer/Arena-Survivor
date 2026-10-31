@@ -108,8 +108,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04313e793d04a5d4d9ad71006563c1de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.AgentBehaviour.AgentMovementScript
-  MovementSpeed: 1.5
-  RotationSpeed: 180
+  MovementSpeed: 6
+  RotationSpeed: 720
 --- !u!1001 &3867437939970566617
 PrefabInstance:
   m_ObjectHideFlags: 0
