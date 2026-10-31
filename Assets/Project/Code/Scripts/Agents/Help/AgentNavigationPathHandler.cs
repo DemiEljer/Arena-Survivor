@@ -451,7 +451,7 @@ namespace Assets.Project.Code.Scripts.Agents.Help
 
                             MapGenerationScript.MapNavigation.DynamicObstacles.HandleSingle((obstacles) =>
                             {
-                                var currentRoomPath = MapGenerationScript.MapNavigation.NavigationGraph.FindPathInRoomDynamic(currentPoint, _PathPoints.Next.Point, BaseScript);
+                                var currentRoomPath = MapGenerationScript.MapNavigation.NavigationGraph.FindPathInRoomDynamic(currentPoint, _PathPoints.Next.Point, BaseScript, CurrentRoom.AreEqual(_PathPoints.Last.Room));
 
                                 if (currentRoomPath.DynamicPath.Length <= 1)
                                 {
@@ -479,7 +479,7 @@ namespace Assets.Project.Code.Scripts.Agents.Help
                                     }
                                     else
                                     {
-                                        NavigationPathHasBeenCorruptedEvent?.Invoke();
+                                        NavigationPathHasBeenBlockedEvent?.Invoke();
 
                                         corruptionFlag = true;
 
