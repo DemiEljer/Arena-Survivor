@@ -703,7 +703,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 801c80a2300063643bd3f15dba2180d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Project.Code.Scripts.Agents.Fabrics.AgentEnemyFabricScript
-  DefaultEnemyPrefab: {fileID: 1305328787837311285, guid: 39aec0048d5d93747b88517a11c02489, type: 3}
+  DefauleMobes:
+  - {fileID: 1305328787837311285, guid: 39aec0048d5d93747b88517a11c02489, type: 3}
+  - {fileID: 408987847091238999, guid: 183462270ecd6d941b4ba999c679f829, type: 3}
 --- !u!114 &1705757699
 MonoBehaviour:
   m_ObjectHideFlags: 0
